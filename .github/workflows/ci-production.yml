@@ -25,12 +25,6 @@ jobs:
       - name: Install dependencies (npm)
         run: npm install
 
-      - name: Run Format
-        run: npm run format
-
-      - name: Run Minify
-        run: npm run minify
-
       - name: Build React App
         run: npm run build
 
@@ -67,3 +61,4 @@ jobs:
         run: |
           docker push $PROJECT_NAME:$NEW_VERSION
           docker push $PROJECT_NAME:latest
+
