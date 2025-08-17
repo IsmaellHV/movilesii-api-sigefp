@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "docker": "rm -rf build && tsc --project ./ && cp -a ./src/assets ./build/src && docker image rm -f api-sigecomer-backend-all && docker build -t api-sigecomer-backend-all .",
+    "publish": "rm -f api-sigecomer-backend-all.tgz && docker save api-sigecomer-backend-all | gzip > api-sigecomer-backend-all.tgz",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -19,6 +21,7 @@
   "author": "CIBERTEC - Desarrollo de Aplicaciones Móviles II",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

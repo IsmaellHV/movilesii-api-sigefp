@@ -7,12 +7,14 @@ API REST desarrollada con Node.js y Express.js para la gestión financiera perso
 ## 🏗️ Arquitectura del Sistema
 
 ### Base de Datos
+
 - **Motor**: MySQL 8+
 - **Tablas principales**: USUARIO, TIPO, INGRESO, GASTO
 - **Stored Procedures**: Para operaciones CRUD optimizadas
 - **Relaciones**: Claves foráneas para integridad referencial
 
 ### Backend
+
 - **Framework**: Express.js 4
 - **Autenticación**: JWT (JSON Web Tokens)
 - **Validación**: Express Validator
@@ -77,29 +79,32 @@ api-proyecto2025/
 
 ### Prerrequisitos
 
-- Node.js 18+ 
+- Node.js 18+
 - MySQL 8+
 - npm o yarn
 
 ### Pasos de Instalación
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone <url-del-repositorio>
 cd api-proyecto2025
 ```
 
 2. **Instalar dependencias**
+
 ```bash
 npm install
 ```
 
 3. **Configurar base de datos**
+
 ```bash
 # Crear base de datos en MySQL
 mysql -u root -p
-CREATE DATABASE gestion_financiera;
-USE gestion_financiera;
+CREATE DATABASE sigefp;
+USE sigefp;
 
 # Ejecutar script de estructura
 source db/query.sql;
@@ -109,6 +114,7 @@ source db/test-data.sql;
 ```
 
 4. **Configurar variables de entorno**
+
 ```bash
 # Copiar archivo de ejemplo
 cp .env.example .env
@@ -118,6 +124,7 @@ nano .env
 ```
 
 5. **Iniciar el servidor**
+
 ```bash
 # Desarrollo
 npm run dev
@@ -138,7 +145,7 @@ NODE_ENV=development
 # Base de Datos
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=gestion_financiera
+DB_NAME=sigefp
 DB_USER=root
 DB_PASSWORD=tu_password
 
@@ -154,6 +161,7 @@ CORS_ORIGINS=http://localhost:3000
 ## 📚 Documentación de la API
 
 ### Base URL
+
 ```
 http://localhost:3000/api
 ```
@@ -161,6 +169,7 @@ http://localhost:3000/api
 ### Autenticación
 
 La API utiliza JWT para autenticación. Incluir el token en el header:
+
 ```
 Authorization: Bearer <token>
 ```
@@ -169,70 +178,71 @@ Authorization: Bearer <token>
 
 #### 🔐 Autenticación
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/auth/register` | Registrar usuario |
-| POST | `/auth/login` | Iniciar sesión |
-| POST | `/auth/refresh` | Renovar token |
-| POST | `/auth/logout` | Cerrar sesión |
-| POST | `/auth/change-password` | Cambiar contraseña |
+| Método | Endpoint                | Descripción        |
+| ------ | ----------------------- | ------------------ |
+| POST   | `/auth/register`        | Registrar usuario  |
+| POST   | `/auth/login`           | Iniciar sesión     |
+| POST   | `/auth/refresh`         | Renovar token      |
+| POST   | `/auth/logout`          | Cerrar sesión      |
+| POST   | `/auth/change-password` | Cambiar contraseña |
 
 #### 👥 Usuarios
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/usuarios` | Listar usuarios |
-| GET | `/usuarios/:id` | Obtener usuario |
-| PUT | `/usuarios/:id` | Actualizar usuario |
-| DELETE | `/usuarios/:id` | Eliminar usuario |
-| GET | `/usuarios/:id/estadisticas` | Estadísticas del usuario |
+| Método | Endpoint                     | Descripción              |
+| ------ | ---------------------------- | ------------------------ |
+| GET    | `/usuarios`                  | Listar usuarios          |
+| GET    | `/usuarios/:id`              | Obtener usuario          |
+| PUT    | `/usuarios/:id`              | Actualizar usuario       |
+| DELETE | `/usuarios/:id`              | Eliminar usuario         |
+| GET    | `/usuarios/:id/estadisticas` | Estadísticas del usuario |
 
 #### 🏷️ Tipos/Categorías
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/tipos` | Listar todos los tipos |
-| GET | `/tipos/categoria/:categoria` | Tipos por categoría |
-| GET | `/tipos/:id` | Obtener tipo por ID |
-| POST | `/tipos` | Crear nuevo tipo |
-| PUT | `/tipos/:id` | Actualizar tipo |
-| DELETE | `/tipos/:id` | Eliminar tipo |
+| Método | Endpoint                      | Descripción            |
+| ------ | ----------------------------- | ---------------------- |
+| GET    | `/tipos`                      | Listar todos los tipos |
+| GET    | `/tipos/categoria/:categoria` | Tipos por categoría    |
+| GET    | `/tipos/:id`                  | Obtener tipo por ID    |
+| POST   | `/tipos`                      | Crear nuevo tipo       |
+| PUT    | `/tipos/:id`                  | Actualizar tipo        |
+| DELETE | `/tipos/:id`                  | Eliminar tipo          |
 
 #### 💰 Ingresos
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/ingresos` | Listar ingresos |
-| GET | `/ingresos/:id` | Obtener ingreso |
-| POST | `/ingresos` | Crear ingreso |
-| PUT | `/ingresos/:id` | Actualizar ingreso |
-| DELETE | `/ingresos/:id` | Eliminar ingreso |
-| GET | `/ingresos/resumen/estadisticas` | Estadísticas de ingresos |
+| Método | Endpoint                         | Descripción              |
+| ------ | -------------------------------- | ------------------------ |
+| GET    | `/ingresos`                      | Listar ingresos          |
+| GET    | `/ingresos/:id`                  | Obtener ingreso          |
+| POST   | `/ingresos`                      | Crear ingreso            |
+| PUT    | `/ingresos/:id`                  | Actualizar ingreso       |
+| DELETE | `/ingresos/:id`                  | Eliminar ingreso         |
+| GET    | `/ingresos/resumen/estadisticas` | Estadísticas de ingresos |
 
 #### 💸 Gastos
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/gastos` | Listar gastos |
-| GET | `/gastos/:id` | Obtener gasto |
-| POST | `/gastos` | Crear gasto |
-| PUT | `/gastos/:id` | Actualizar gasto |
-| DELETE | `/gastos/:id` | Eliminar gasto |
-| GET | `/gastos/telefono/:telefono` | Gastos por teléfono |
-| GET | `/gastos/resumen/estadisticas` | Estadísticas de gastos |
+| Método | Endpoint                       | Descripción            |
+| ------ | ------------------------------ | ---------------------- |
+| GET    | `/gastos`                      | Listar gastos          |
+| GET    | `/gastos/:id`                  | Obtener gasto          |
+| POST   | `/gastos`                      | Crear gasto            |
+| PUT    | `/gastos/:id`                  | Actualizar gasto       |
+| DELETE | `/gastos/:id`                  | Eliminar gasto         |
+| GET    | `/gastos/telefono/:telefono`   | Gastos por teléfono    |
+| GET    | `/gastos/resumen/estadisticas` | Estadísticas de gastos |
 
 #### 📊 Balance
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/balance` | Balance general |
-| GET | `/balance/resumen` | Resumen financiero |
-| GET | `/balance/estadisticas/mensuales` | Estadísticas mensuales |
-| GET | `/balance/periodo` | Balance por período |
+| Método | Endpoint                          | Descripción            |
+| ------ | --------------------------------- | ---------------------- |
+| GET    | `/balance`                        | Balance general        |
+| GET    | `/balance/resumen`                | Resumen financiero     |
+| GET    | `/balance/estadisticas/mensuales` | Estadísticas mensuales |
+| GET    | `/balance/periodo`                | Balance por período    |
 
 ### Ejemplos de Uso
 
 #### Registro de Usuario
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -245,6 +255,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 ```
 
 #### Login
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -255,6 +266,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 #### Crear Ingreso
+
 ```bash
 curl -X POST http://localhost:3000/api/ingresos \
   -H "Content-Type: application/json" \
@@ -268,6 +280,7 @@ curl -X POST http://localhost:3000/api/ingresos \
 ```
 
 #### Crear Gasto
+
 ```bash
 curl -X POST http://localhost:3000/api/gastos \
   -H "Content-Type: application/json" \
@@ -282,6 +295,7 @@ curl -X POST http://localhost:3000/api/gastos \
 ```
 
 #### Obtener Balance
+
 ```bash
 curl -X GET http://localhost:3000/api/balance \
   -H "Authorization: Bearer <token>"
@@ -290,6 +304,7 @@ curl -X GET http://localhost:3000/api/balance \
 ### Respuestas de la API
 
 #### Respuesta Exitosa
+
 ```json
 {
   "success": true,
@@ -303,6 +318,7 @@ curl -X GET http://localhost:3000/api/balance \
 ```
 
 #### Respuesta de Error
+
 ```json
 {
   "success": false,
@@ -331,10 +347,10 @@ El archivo `db/test-data.sql` contiene datos de prueba que incluyen:
 
 ### Usuarios de Prueba
 
-| Email | Contraseña | Descripción |
-|-------|------------|-------------|
-| juan.perez@email.com | password123 | Usuario administrador |
-| maria.garcia@email.com | password123 | Usuario regular |
+| Email                  | Contraseña  | Descripción               |
+| ---------------------- | ----------- | ------------------------- |
+| juan.perez@email.com   | password123 | Usuario administrador     |
+| maria.garcia@email.com | password123 | Usuario regular           |
 | carlos.lopez@email.com | password123 | Usuario con transacciones |
 
 ### Ejecutar Tests
@@ -387,6 +403,7 @@ curl http://localhost:3000/health
 ```
 
 Respuesta:
+
 ```json
 {
   "status": "OK",
@@ -441,6 +458,7 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 ## 👨‍💻 Autor
 
 **Ismael HV**
+
 - Proyecto académico - CIBERTEC
 - Curso: Desarrollo de Aplicaciones Móviles II
 - Año: 2025

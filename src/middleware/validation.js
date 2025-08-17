@@ -6,6 +6,7 @@ const { createValidationError } = require('./errorHandler');
  */
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
+  console.log('errors', errors);
   
   if (!errors.isEmpty()) {
     const formattedErrors = errors.array().map(error => ({
@@ -25,10 +26,10 @@ const handleValidationErrors = (req, res, next) => {
 // ==================== VALIDACIONES DE AUTENTICACIÓN ====================
 
 /**
- * Validaciones para registro de usuario
+ * Validaciones para registro de usuario (campos originales del sistema)
  */
 const validateRegister = [
-  body('nombre')
+  body('nombreUsuario')
     .trim()
     .notEmpty()
     .withMessage('El nombre es requerido')
@@ -37,7 +38,7 @@ const validateRegister = [
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('El nombre solo puede contener letras y espacios'),
     
-  body('apellido')
+  body('apellidoUsuario')
     .trim()
     .notEmpty()
     .withMessage('El apellido es requerido')
@@ -45,6 +46,40 @@ const validateRegister = [
     .withMessage('El apellido debe tener entre 2 y 50 caracteres')
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('El apellido solo puede contener letras y espacios'),
+    
+  body('correoUsuario')
+    .trim()
+    .notEmpty()
+    .withMessage('El correo es requerido')
+    .isEmail()
+    .withMessage('Debe ser un correo electrónico válido')
+    .normalizeEmail()
+    .isLength({ max: 100 })
+    .withMessage('El correo no puede exceder 100 caracteres'),
+    
+  body('passwordUsuario')
+    .notEmpty()
+    .withMessage('La contraseña es requerida')
+    .isLength({ min: 6, max: 100 })
+    .withMessage('La contraseña debe tener entre 6 y 100 caracteres')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
+    .withMessage('La contraseña debe contener al menos una letra minúscula, una mayúscula y un número'),
+    
+  handleValidationErrors
+];
+
+/**
+ * Validaciones para registro de usuario (campos del cliente)
+ */
+const validateUserRegister = [
+  body('nombre')
+    .trim()
+    .notEmpty()
+    .withMessage('El nombre es requerido')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('El nombre debe tener entre 2 y 50 caracteres')
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
+    .withMessage('El nombre solo puede contener letras y espacios'),
     
   body('correo')
     .trim()
@@ -57,13 +92,12 @@ const validateRegister = [
     .withMessage('El correo no puede exceder 100 caracteres'),
     
   body('telefono')
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage('El teléfono es requerido')
-    .matches(/^[0-9+\-\s()]+$/)
-    .withMessage('El teléfono solo puede contener números, +, -, espacios y paréntesis')
     .isLength({ min: 9, max: 15 })
-    .withMessage('El teléfono debe tener entre 9 y 15 caracteres'),
+    .withMessage('El teléfono debe tener entre 9 y 15 caracteres')
+    .matches(/^[0-9+\-\s()]+$/)
+    .withMessage('El teléfono solo puede contener números, espacios, paréntesis, guiones y el símbolo +'),
     
   body('password')
     .notEmpty()
@@ -77,9 +111,27 @@ const validateRegister = [
 ];
 
 /**
- * Validaciones para login
+ * Middleware para transformar campos del cliente a formato del sistema
  */
-const validateLogin = [
+const transformUserFields = (req, res, next) => {
+  if (req.body.nombre) {
+    req.body.nombreUsuario = req.body.nombre;
+    req.body.apellidoUsuario = req.body.nombre; // Si no hay apellido separado, usar el nombre
+  }
+  if (req.body.correo) {
+    req.body.correoUsuario = req.body.correo;
+  }
+  if (req.body.password) {
+    req.body.passwordUsuario = req.body.password;
+  }
+  // El teléfono no se usa en el controlador actual, pero lo mantenemos para futuras implementaciones
+  next();
+};
+
+/**
+ * Validaciones para login (campos del cliente)
+ */
+const validateUserLogin = [
   body('correo')
     .trim()
     .notEmpty()
@@ -89,6 +141,25 @@ const validateLogin = [
     .normalizeEmail(),
     
   body('password')
+    .notEmpty()
+    .withMessage('La contraseña es requerida'),
+    
+  handleValidationErrors
+];
+
+/**
+ * Validaciones para login
+ */
+const validateLogin = [
+  body('correoUsuario')
+    .trim()
+    .notEmpty()
+    .withMessage('El correo es requerido')
+    .isEmail()
+    .withMessage('Debe ser un correo electrónico válido')
+    .normalizeEmail(),
+    
+  body('passwordUsuario')
     .notEmpty()
     .withMessage('La contraseña es requerida'),
     
@@ -130,7 +201,7 @@ const validateChangePassword = [
  * Validaciones para actualizar usuario
  */
 const validateUpdateUser = [
-  body('nombre')
+  body('nombreUsuario')
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
@@ -138,7 +209,7 @@ const validateUpdateUser = [
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('El nombre solo puede contener letras y espacios'),
     
-  body('apellido')
+  body('apellidoUsuario')
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
@@ -146,7 +217,7 @@ const validateUpdateUser = [
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('El apellido solo puede contener letras y espacios'),
     
-  body('correo')
+  body('correoUsuario')
     .optional()
     .trim()
     .isEmail()
@@ -164,7 +235,7 @@ const validateUpdateUser = [
  * Validaciones para crear/actualizar tipo
  */
 const validateType = [
-  body('nombre')
+  body('nombreTipo')
     .trim()
     .notEmpty()
     .withMessage('El nombre del tipo es requerido')
@@ -192,20 +263,20 @@ const validateType = [
  * Validaciones para crear/actualizar ingreso
  */
 const validateIngreso = [
-  body('monto')
+  body('montoIngreso')
     .notEmpty()
     .withMessage('El monto es requerido')
     .isFloat({ min: 0.01 })
     .withMessage('El monto debe ser un número positivo mayor a 0'),
     
-  body('descripcion')
+  body('descripcionIngreso')
     .trim()
     .notEmpty()
     .withMessage('La descripción es requerida')
     .isLength({ min: 3, max: 200 })
     .withMessage('La descripción debe tener entre 3 y 200 caracteres'),
     
-  body('fecha')
+  body('fechaIngreso')
     .optional()
     .isISO8601()
     .withMessage('La fecha debe tener un formato válido (YYYY-MM-DD)')
@@ -218,7 +289,7 @@ const validateIngreso = [
       return true;
     }),
     
-  body('tipoId')
+  body('idTipo')
     .notEmpty()
     .withMessage('El tipo de ingreso es requerido')
     .isInt({ min: 1 })
@@ -233,20 +304,20 @@ const validateIngreso = [
  * Validaciones para crear/actualizar gasto
  */
 const validateGasto = [
-  body('monto')
+  body('montoGasto')
     .notEmpty()
     .withMessage('El monto es requerido')
     .isFloat({ min: 0.01 })
     .withMessage('El monto debe ser un número positivo mayor a 0'),
     
-  body('descripcion')
+  body('descripcionGasto')
     .trim()
     .notEmpty()
     .withMessage('La descripción es requerida')
     .isLength({ min: 3, max: 200 })
     .withMessage('La descripción debe tener entre 3 y 200 caracteres'),
     
-  body('fecha')
+  body('fechaGasto')
     .optional()
     .isISO8601()
     .withMessage('La fecha debe tener un formato válido (YYYY-MM-DD)')
@@ -259,13 +330,13 @@ const validateGasto = [
       return true;
     }),
     
-  body('tipoId')
+  body('idTipo')
     .notEmpty()
     .withMessage('El tipo de gasto es requerido')
     .isInt({ min: 1 })
     .withMessage('El tipo de gasto debe ser un número entero válido'),
     
-  body('metodoPagoId')
+  body('idMetodoPago')
     .notEmpty()
     .withMessage('El método de pago es requerido')
     .isInt({ min: 1 })
@@ -390,10 +461,13 @@ const validateTypeFilters = [
 module.exports = {
   // Middleware
   handleValidationErrors,
+  transformUserFields,
   
   // Autenticación
   validateRegister,
+  validateUserRegister,
   validateLogin,
+  validateUserLogin,
   validateChangePassword,
   
   // Usuario

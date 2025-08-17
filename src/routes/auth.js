@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateRegister, validateLogin, validateChangePassword, handleValidationErrors } = require('../middleware/validation');
+const { validateRegister, validateUserRegister, validateLogin, validateUserLogin, validateChangePassword, handleValidationErrors, transformUserFields } = require('../middleware/validation');
 
 /**
  * @route POST /api/auth/register
@@ -10,8 +10,8 @@ const { validateRegister, validateLogin, validateChangePassword, handleValidatio
  * @access Public
  */
 router.post('/register', 
-  validateRegister,
-  handleValidationErrors,
+  validateUserRegister,
+  transformUserFields,
   authController.register
 );
 
@@ -21,8 +21,8 @@ router.post('/register',
  * @access Public
  */
 router.post('/login', 
-  validateLogin,
-  handleValidationErrors,
+  validateUserLogin,
+  transformUserFields,
   authController.login
 );
 
