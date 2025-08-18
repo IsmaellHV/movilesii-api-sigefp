@@ -141,6 +141,7 @@ npm start
 # Servidor
 PORT=3000
 NODE_ENV=development
+PREFIJO=v1
 
 # Base de Datos
 DB_HOST=localhost
@@ -158,13 +159,23 @@ BCRYPT_ROUNDS=12
 CORS_ORIGINS=http://localhost:3000
 ```
 
+#### Variable PREFIJO
+
+La variable `PREFIJO` define la versión de la API y se utiliza en todas las rutas:
+- **Propósito**: Versionado de la API para mantener compatibilidad
+- **Formato**: `/api/${PREFIJO}/endpoint`
+- **Ejemplo**: Con `PREFIJO=v1`, la ruta sería `/api/v1/usuarios`
+- **Valores sugeridos**: v1, v2, v3, etc.
+
 ## 📚 Documentación de la API
 
 ### Base URL
 
 ```
-http://localhost:3000/api
+http://localhost:3000/api/${PREFIJO}
 ```
+
+**Nota**: `${PREFIJO}` es una variable de entorno que define la versión de la API (ej: v1, v2). Ver sección de configuración para más detalles.
 
 ### Autenticación
 
@@ -178,73 +189,73 @@ Authorization: Bearer <token>
 
 #### 🔐 Autenticación
 
-| Método | Endpoint                | Descripción        |
-| ------ | ----------------------- | ------------------ |
-| POST   | `/auth/register`        | Registrar usuario  |
-| POST   | `/auth/login`           | Iniciar sesión     |
-| POST   | `/auth/refresh`         | Renovar token      |
-| POST   | `/auth/logout`          | Cerrar sesión      |
-| POST   | `/auth/change-password` | Cambiar contraseña |
+| Método | Endpoint                        | Descripción        |
+| ------ | ------------------------------- | ------------------ |
+| POST   | `/api/${PREFIJO}/auth/register`        | Registrar usuario  |
+| POST   | `/api/${PREFIJO}/auth/login`           | Iniciar sesión     |
+| POST   | `/api/${PREFIJO}/auth/refresh`         | Renovar token      |
+| POST   | `/api/${PREFIJO}/auth/logout`          | Cerrar sesión      |
+| POST   | `/api/${PREFIJO}/auth/change-password` | Cambiar contraseña |
 
 #### 👥 Usuarios
 
-| Método | Endpoint                     | Descripción              |
-| ------ | ---------------------------- | ------------------------ |
-| GET    | `/usuarios`                  | Listar usuarios          |
-| GET    | `/usuarios/:id`              | Obtener usuario          |
-| PUT    | `/usuarios/:id`              | Actualizar usuario       |
-| DELETE | `/usuarios/:id`              | Eliminar usuario         |
-| GET    | `/usuarios/:id/estadisticas` | Estadísticas del usuario |
+| Método | Endpoint                             | Descripción              |
+| ------ | ------------------------------------ | ------------------------ |
+| GET    | `/api/${PREFIJO}/usuarios`                  | Listar usuarios          |
+| GET    | `/api/${PREFIJO}/usuarios/:id`              | Obtener usuario          |
+| PUT    | `/api/${PREFIJO}/usuarios/:id`              | Actualizar usuario       |
+| DELETE | `/api/${PREFIJO}/usuarios/:id`              | Eliminar usuario         |
+| GET    | `/api/${PREFIJO}/usuarios/:id/estadisticas` | Estadísticas del usuario |
 
 #### 🏷️ Tipos/Categorías
 
-| Método | Endpoint                      | Descripción            |
-| ------ | ----------------------------- | ---------------------- |
-| GET    | `/tipos`                      | Listar todos los tipos |
-| GET    | `/tipos/categoria/:categoria` | Tipos por categoría    |
-| GET    | `/tipos/:id`                  | Obtener tipo por ID    |
-| POST   | `/tipos`                      | Crear nuevo tipo       |
-| PUT    | `/tipos/:id`                  | Actualizar tipo        |
-| DELETE | `/tipos/:id`                  | Eliminar tipo          |
+| Método | Endpoint                              | Descripción            |
+| ------ | ------------------------------------- | ---------------------- |
+| GET    | `/api/${PREFIJO}/tipos`                      | Listar todos los tipos |
+| GET    | `/api/${PREFIJO}/tipos/categoria/:categoria` | Tipos por categoría    |
+| GET    | `/api/${PREFIJO}/tipos/:id`                  | Obtener tipo por ID    |
+| POST   | `/api/${PREFIJO}/tipos`                      | Crear nuevo tipo       |
+| PUT    | `/api/${PREFIJO}/tipos/:id`                  | Actualizar tipo        |
+| DELETE | `/api/${PREFIJO}/tipos/:id`                  | Eliminar tipo          |
 
 #### 💰 Ingresos
 
-| Método | Endpoint                         | Descripción              |
-| ------ | -------------------------------- | ------------------------ |
-| GET    | `/ingresos`                      | Listar ingresos          |
-| GET    | `/ingresos/:id`                  | Obtener ingreso          |
-| POST   | `/ingresos`                      | Crear ingreso            |
-| PUT    | `/ingresos/:id`                  | Actualizar ingreso       |
-| DELETE | `/ingresos/:id`                  | Eliminar ingreso         |
-| GET    | `/ingresos/resumen/estadisticas` | Estadísticas de ingresos |
+| Método | Endpoint                                 | Descripción              |
+| ------ | ---------------------------------------- | ------------------------ |
+| GET    | `/api/${PREFIJO}/ingresos`                      | Listar ingresos          |
+| GET    | `/api/${PREFIJO}/ingresos/:id`                  | Obtener ingreso          |
+| POST   | `/api/${PREFIJO}/ingresos`                      | Crear ingreso            |
+| PUT    | `/api/${PREFIJO}/ingresos/:id`                  | Actualizar ingreso       |
+| DELETE | `/api/${PREFIJO}/ingresos/:id`                  | Eliminar ingreso         |
+| GET    | `/api/${PREFIJO}/ingresos/resumen/estadisticas` | Estadísticas de ingresos |
 
 #### 💸 Gastos
 
-| Método | Endpoint                       | Descripción            |
-| ------ | ------------------------------ | ---------------------- |
-| GET    | `/gastos`                      | Listar gastos          |
-| GET    | `/gastos/:id`                  | Obtener gasto          |
-| POST   | `/gastos`                      | Crear gasto            |
-| PUT    | `/gastos/:id`                  | Actualizar gasto       |
-| DELETE | `/gastos/:id`                  | Eliminar gasto         |
-| GET    | `/gastos/telefono/:telefono`   | Gastos por teléfono    |
-| GET    | `/gastos/resumen/estadisticas` | Estadísticas de gastos |
+| Método | Endpoint                               | Descripción            |
+| ------ | -------------------------------------- | ---------------------- |
+| GET    | `/api/${PREFIJO}/gastos`                      | Listar gastos          |
+| GET    | `/api/${PREFIJO}/gastos/:id`                  | Obtener gasto          |
+| POST   | `/api/${PREFIJO}/gastos`                      | Crear gasto            |
+| PUT    | `/api/${PREFIJO}/gastos/:id`                  | Actualizar gasto       |
+| DELETE | `/api/${PREFIJO}/gastos/:id`                  | Eliminar gasto         |
+| GET    | `/api/${PREFIJO}/gastos/telefono/:telefono`   | Gastos por teléfono    |
+| GET    | `/api/${PREFIJO}/gastos/resumen/estadisticas` | Estadísticas de gastos |
 
 #### 📊 Balance
 
-| Método | Endpoint                          | Descripción            |
-| ------ | --------------------------------- | ---------------------- |
-| GET    | `/balance`                        | Balance general        |
-| GET    | `/balance/resumen`                | Resumen financiero     |
-| GET    | `/balance/estadisticas/mensuales` | Estadísticas mensuales |
-| GET    | `/balance/periodo`                | Balance por período    |
+| Método | Endpoint                                  | Descripción            |
+| ------ | ----------------------------------------- | ---------------------- |
+| GET    | `/api/${PREFIJO}/balance`                        | Balance general        |
+| GET    | `/api/${PREFIJO}/balance/resumen`                | Resumen financiero     |
+| GET    | `/api/${PREFIJO}/balance/estadisticas/mensuales` | Estadísticas mensuales |
+| GET    | `/api/${PREFIJO}/balance/periodo`                | Balance por período    |
 
 ### Ejemplos de Uso
 
 #### Registro de Usuario
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Juan Pérez",
@@ -257,7 +268,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 #### Login
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "correo": "juan@email.com",
@@ -268,7 +279,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 #### Crear Ingreso
 
 ```bash
-curl -X POST http://localhost:3000/api/ingresos \
+curl -X POST http://localhost:3000/api/v1/ingresos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
@@ -282,22 +293,21 @@ curl -X POST http://localhost:3000/api/ingresos \
 #### Crear Gasto
 
 ```bash
-curl -X POST http://localhost:3000/api/gastos \
+curl -X POST http://localhost:3000/api/v1/gastos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
-    "monto": 50.00,
-    "descripcion": "Almuerzo",
+    "monto": 250.00,
+    "descripcion": "Compra de comestibles",
     "fecha": "2024-01-15",
-    "tipo_id": 5,
-    "metodo_pago_id": 8
+    "tipo_id": 2
   }'
 ```
 
 #### Obtener Balance
 
 ```bash
-curl -X GET http://localhost:3000/api/balance \
+curl -X GET http://localhost:3000/api/v1/balance \
   -H "Authorization: Bearer <token>"
 ```
 

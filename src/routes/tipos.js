@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateType, validateId } = require('../middleware/ajvValidation');
 
 /**
- * @route GET /api/tipos
+ * @route GET /api/${PREFIJO}/tipos
  * @desc Obtener todos los tipos
  * @access Private
  */
@@ -15,7 +15,7 @@ router.get('/',
 );
 
 /**
- * @route GET /api/tipos/categoria/:categoria
+ * @route GET /api/${PREFIJO}/tipos/categoria/:categoria
  * @desc Obtener tipos por categoría (Ingreso, Gasto, MetodoPago)
  * @access Private
  */
@@ -25,7 +25,7 @@ router.get('/categoria/:categoria',
 );
 
 /**
- * @route GET /api/tipos/:id
+ * @route GET /api/${PREFIJO}/tipos/:id
  * @desc Obtener un tipo por ID
  * @access Private
  */
@@ -36,7 +36,7 @@ router.get('/:id',
 );
 
 /**
- * @route POST /api/tipos
+ * @route POST /api/${PREFIJO}/tipos
  * @desc Crear un nuevo tipo
  * @access Private
  */
@@ -47,7 +47,7 @@ router.post('/',
 );
 
 /**
- * @route PUT /api/tipos/:id
+ * @route PUT /api/${PREFIJO}/tipos/:id
  * @desc Actualizar un tipo
  * @access Private
  */
@@ -59,7 +59,7 @@ router.put('/:id',
 );
 
 /**
- * @route DELETE /api/tipos/:id
+ * @route DELETE /api/${PREFIJO}/tipos/:id
  * @desc Eliminar un tipo
  * @access Private
  */

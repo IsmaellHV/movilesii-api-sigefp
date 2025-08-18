@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateUpdateUser, validateId } = require('../middleware/ajvValidation');
 
 /**
- * @route GET /api/usuarios
+ * @route GET /api/${PREFIJO}/usuarios
  * @desc Obtener todos los usuarios (solo para administradores)
  * @access Private
  */
@@ -15,7 +15,7 @@ router.get('/',
 );
 
 /**
- * @route GET /api/usuarios/:id
+ * @route GET /api/${PREFIJO}/usuarios/:id
  * @desc Obtener un usuario por ID
  * @access Private
  */
@@ -26,7 +26,7 @@ router.get('/:id',
 );
 
 /**
- * @route PUT /api/usuarios/:id
+ * @route PUT /api/${PREFIJO}/usuarios/:id
  * @desc Actualizar información del usuario
  * @access Private
  */
@@ -38,7 +38,7 @@ router.put('/:id',
 );
 
 /**
- * @route DELETE /api/usuarios/:id
+ * @route DELETE /api/${PREFIJO}/usuarios/:id
  * @desc Eliminar cuenta de usuario
  * @access Private
  */
@@ -49,7 +49,7 @@ router.delete('/:id',
 );
 
 /**
- * @route GET /api/usuarios/:id/estadisticas
+ * @route GET /api/${PREFIJO}/usuarios/:id/estadisticas
  * @desc Obtener estadísticas del usuario
  * @access Private
  */

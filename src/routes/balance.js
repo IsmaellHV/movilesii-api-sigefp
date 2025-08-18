@@ -4,7 +4,7 @@ const balanceController = require('../controllers/balanceController');
 const { authenticateToken } = require('../middleware/auth');
 
 /**
- * @route GET /api/balance
+ * @route GET /api/${PREFIJO}/balance
  * @desc Obtener balance del usuario autenticado
  * @access Private
  */
@@ -14,7 +14,7 @@ router.get('/',
 );
 
 /**
- * @route GET /api/balance/resumen
+ * @route GET /api/${PREFIJO}/balance/resumen
  * @desc Obtener resumen financiero completo del usuario
  * @access Private
  */
@@ -24,7 +24,7 @@ router.get('/resumen',
 );
 
 /**
- * @route GET /api/balance/estadisticas/mensuales
+ * @route GET /api/${PREFIJO}/balance/estadisticas/mensuales
  * @desc Obtener estadísticas mensuales de ingresos y gastos
  * @access Private
  */
@@ -34,7 +34,7 @@ router.get('/estadisticas/mensuales',
 );
 
 /**
- * @route GET /api/balance/periodo
+ * @route GET /api/${PREFIJO}/balance/periodo
  * @desc Obtener balance filtrado por período de fechas
  * @query fechaInicio - Fecha de inicio (YYYY-MM-DD)
  * @query fechaFin - Fecha de fin (YYYY-MM-DD)

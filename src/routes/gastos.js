@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateGasto, validateId, validateTelefono } = require('../middleware/ajvValidation');
 
 /**
- * @route GET /api/gastos
+ * @route GET /api/${PREFIJO}/gastos
  * @desc Obtener todos los gastos del usuario autenticado
  * @access Private
  */
@@ -15,7 +15,7 @@ router.get('/',
 );
 
 /**
- * @route GET /api/gastos/telefono/:telefono
+ * @route GET /api/${PREFIJO}/gastos/telefono/:telefono
  * @desc Obtener gastos por número de teléfono
  * @access Private
  */
@@ -26,7 +26,7 @@ router.get('/telefono/:telefono',
 );
 
 /**
- * @route GET /api/gastos/:id
+ * @route GET /api/${PREFIJO}/gastos/:id
  * @desc Obtener un gasto por ID
  * @access Private
  */
@@ -37,7 +37,7 @@ router.get('/:id',
 );
 
 /**
- * @route POST /api/gastos
+ * @route POST /api/${PREFIJO}/gastos
  * @desc Crear un nuevo gasto
  * @access Private
  */
@@ -48,7 +48,7 @@ router.post('/',
 );
 
 /**
- * @route PUT /api/gastos/:id
+ * @route PUT /api/${PREFIJO}/gastos/:id
  * @desc Actualizar un gasto
  * @access Private
  */
@@ -60,7 +60,7 @@ router.put('/:id',
 );
 
 /**
- * @route DELETE /api/gastos/:id
+ * @route DELETE /api/${PREFIJO}/gastos/:id
  * @desc Eliminar un gasto
  * @access Private
  */
@@ -71,7 +71,7 @@ router.delete('/:id',
 );
 
 /**
- * @route GET /api/gastos/resumen/estadisticas
+ * @route GET /api/${PREFIJO}/gastos/resumen/estadisticas
  * @desc Obtener resumen de gastos del usuario
  * @access Private
  */

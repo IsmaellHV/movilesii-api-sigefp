@@ -24,23 +24,17 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Permitir requests sin origin (como aplicaciones móviles o Postman)
     if (!origin) return callback(null, true);
-    
+
     // Lista de dominios permitidos
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:5173',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173'
-    ];
-    
+    const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
+
     // En desarrollo, permitir cualquier localhost
     if (process.env.NODE_ENV === 'development') {
       if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
         return callback(null, true);
       }
     }
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -49,7 +43,7 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 // Middlewares globales
@@ -80,38 +74,37 @@ app.get('/health', (req, res) => {
     message: 'Servidor funcionando correctamente',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
-
 // Ruta raíz
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'API de Gestión Financiera Personal',
     version: '1.0.0',
-    documentation: '/api/docs',
+    documentation: `/api/${process.env.PREFIJO}/docs`,
     endpoints: {
-      auth: '/api/auth',
-      usuarios: '/api/usuarios',
-      tipos: '/api/tipos',
-      ingresos: '/api/ingresos',
-      gastos: '/api/gastos',
-      balance: '/api/balance'
-    }
+      auth: `/api/${process.env.PREFIJO}/auth`,
+      usuarios: `/api/${process.env.PREFIJO}/usuarios`,
+      tipos: `/api/${process.env.PREFIJO}/tipos`,
+      ingresos: `/api/${process.env.PREFIJO}/ingresos`,
+      gastos: `/api/${process.env.PREFIJO}/gastos`,
+      balance: `/api/${process.env.PREFIJO}/balance`,
+    },
   });
 });
 
 // Rutas de la API
-app.use('/api/auth', authRoutes);
-app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/tipos', tipoRoutes);
-app.use('/api/ingresos', ingresoRoutes);
-app.use('/api/gastos', gastoRoutes);
-app.use('/api/balance', balanceRoutes);
+app.use(`/api/${process.env.PREFIJO}/auth`, authRoutes);
+app.use(`/api/${process.env.PREFIJO}/usuarios`, usuarioRoutes);
+app.use(`/api/${process.env.PREFIJO}/tipos`, tipoRoutes);
+app.use(`/api/${process.env.PREFIJO}/ingresos`, ingresoRoutes);
+app.use(`/api/${process.env.PREFIJO}/gastos`, gastoRoutes);
+app.use(`/api/${process.env.PREFIJO}/balance`, balanceRoutes);
 
 // Ruta para documentación básica de la API
-app.get('/api/docs', (req, res) => {
+app.get(`/api/${process.env.PREFIJO}/docs`, (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Documentación de la API',
@@ -122,14 +115,14 @@ app.get('/api/docs', (req, res) => {
         register: 'POST /auth/register',
         login: 'POST /auth/login',
         profile: 'GET /auth/profile',
-        changePassword: 'PUT /auth/change-password'
+        changePassword: 'PUT /auth/change-password',
       },
       usuarios: {
         getAll: 'GET /usuarios',
         getById: 'GET /usuarios/:id',
         update: 'PUT /usuarios/:id',
         delete: 'DELETE /usuarios/:id',
-        statistics: 'GET /usuarios/:id/estadisticas'
+        statistics: 'GET /usuarios/:id/estadisticas',
       },
       tipos: {
         getAll: 'GET /tipos',
@@ -137,7 +130,7 @@ app.get('/api/docs', (req, res) => {
         getById: 'GET /tipos/:id',
         create: 'POST /tipos',
         update: 'PUT /tipos/:id',
-        delete: 'DELETE /tipos/:id'
+        delete: 'DELETE /tipos/:id',
       },
       ingresos: {
         getAll: 'GET /ingresos',
@@ -145,7 +138,7 @@ app.get('/api/docs', (req, res) => {
         create: 'POST /ingresos',
         update: 'PUT /ingresos/:id',
         delete: 'DELETE /ingresos/:id',
-        summary: 'GET /ingresos/resumen/estadisticas'
+        summary: 'GET /ingresos/resumen/estadisticas',
       },
       gastos: {
         getAll: 'GET /gastos',
@@ -154,20 +147,20 @@ app.get('/api/docs', (req, res) => {
         create: 'POST /gastos',
         update: 'PUT /gastos/:id',
         delete: 'DELETE /gastos/:id',
-        summary: 'GET /gastos/resumen/estadisticas'
+        summary: 'GET /gastos/resumen/estadisticas',
       },
       balance: {
         getBalance: 'GET /balance',
         getSummary: 'GET /balance/resumen',
         getMonthlyStats: 'GET /balance/estadisticas/mensuales',
-        getByPeriod: 'GET /balance/periodo'
-      }
+        getByPeriod: 'GET /balance/periodo',
+      },
     },
     authentication: {
       type: 'Bearer Token',
       header: 'Authorization: Bearer <token>',
-      note: 'La mayoría de endpoints requieren autenticación'
-    }
+      note: 'La mayoría de endpoints requieren autenticación',
+    },
   });
 });
 
@@ -178,7 +171,7 @@ app.use('*', (req, res) => {
     message: 'Ruta no encontrada',
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 

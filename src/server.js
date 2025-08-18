@@ -25,15 +25,15 @@ async function startServer() {
       console.log('🎉 Servidor iniciado exitosamente');
       console.log(`📍 Servidor ejecutándose en: http://${HOST}:${PORT}`);
       console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📚 Documentación: http://${HOST}:${PORT}/api/docs`);
+      console.log(`📚 Documentación: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/docs`);
       console.log(`❤️  Estado del servidor: http://${HOST}:${PORT}/health`);
       console.log('\n📋 Endpoints disponibles:');
-      console.log(`   • Autenticación: http://${HOST}:${PORT}/api/auth`);
-      console.log(`   • Usuarios: http://${HOST}:${PORT}/api/usuarios`);
-      console.log(`   • Tipos: http://${HOST}:${PORT}/api/tipos`);
-      console.log(`   • Ingresos: http://${HOST}:${PORT}/api/ingresos`);
-      console.log(`   • Gastos: http://${HOST}:${PORT}/api/gastos`);
-      console.log(`   • Balance: http://${HOST}:${PORT}/api/balance`);
+      console.log(`   • Autenticación: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/auth`);
+      console.log(`   • Usuarios: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/usuarios`);
+      console.log(`   • Tipos: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/tipos`);
+      console.log(`   • Ingresos: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/ingresos`);
+      console.log(`   • Gastos: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/gastos`);
+      console.log(`   • Balance: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/balance`);
       console.log('\n🛑 Para detener el servidor: Ctrl+C');
     });
     

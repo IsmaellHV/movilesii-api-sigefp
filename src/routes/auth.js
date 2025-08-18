@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateUserRegister, validateUserLogin, validateChangePassword, transformUserFields } = require('../middleware/ajvValidation');
 
 /**
- * @route POST /api/auth/register
+ * @route POST /api/${PREFIJO}/auth/register
  * @desc Registrar un nuevo usuario
  * @access Public
  */
@@ -16,7 +16,7 @@ router.post('/register',
 );
 
 /**
- * @route POST /api/auth/login
+ * @route POST /api/${PREFIJO}/auth/login
  * @desc Iniciar sesión
  * @access Public
  */
@@ -27,7 +27,7 @@ router.post('/login',
 );
 
 /**
- * @route GET /api/auth/profile
+ * @route GET /api/${PREFIJO}/auth/profile
  * @desc Obtener perfil del usuario autenticado
  * @access Private
  */
@@ -37,7 +37,7 @@ router.get('/profile',
 );
 
 /**
- * @route PUT /api/auth/change-password
+ * @route PUT /api/${PREFIJO}/auth/change-password
  * @desc Cambiar contraseña del usuario
  * @access Private
  */
@@ -48,7 +48,7 @@ router.put('/change-password',
 );
 
 /**
- * @route POST /api/auth/refresh
+ * @route POST /api/${PREFIJO}/auth/refresh
  * @desc Refrescar token de acceso
  * @access Private
  */

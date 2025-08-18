@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateIngreso, validateId } = require('../middleware/ajvValidation');
 
 /**
- * @route GET /api/ingresos
+ * @route GET /api/${PREFIJO}/ingresos
  * @desc Obtener todos los ingresos del usuario autenticado
  * @access Private
  */
@@ -15,7 +15,7 @@ router.get('/',
 );
 
 /**
- * @route GET /api/ingresos/:id
+ * @route GET /api/${PREFIJO}/ingresos/:id
  * @desc Obtener un ingreso por ID
  * @access Private
  */
@@ -26,7 +26,7 @@ router.get('/:id',
 );
 
 /**
- * @route POST /api/ingresos
+ * @route POST /api/${PREFIJO}/ingresos
  * @desc Crear un nuevo ingreso
  * @access Private
  */
@@ -37,7 +37,7 @@ router.post('/',
 );
 
 /**
- * @route PUT /api/ingresos/:id
+ * @route PUT /api/${PREFIJO}/ingresos/:id
  * @desc Actualizar un ingreso
  * @access Private
  */
@@ -49,7 +49,7 @@ router.put('/:id',
 );
 
 /**
- * @route DELETE /api/ingresos/:id
+ * @route DELETE /api/${PREFIJO}/ingresos/:id
  * @desc Eliminar un ingreso
  * @access Private
  */
@@ -60,7 +60,7 @@ router.delete('/:id',
 );
 
 /**
- * @route GET /api/ingresos/resumen/estadisticas
+ * @route GET /api/${PREFIJO}/ingresos/resumen/estadisticas
  * @desc Obtener resumen de ingresos del usuario
  * @access Private
  */
