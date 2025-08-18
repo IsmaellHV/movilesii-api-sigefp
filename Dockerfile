@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Usar versión específica de Node.js para mayor seguridad
 FROM node:20.18.0-alpine AS builder
 
@@ -59,3 +60,23 @@ EXPOSE 80
 
 # Usar dumb-init y corregir ruta del archivo principal
 CMD ["dumb-init", "node", "src/server.js"]
+=======
+FROM node:20-alpine AS builder
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY . .
+
+FROM node:20-alpine AS runner
+ENV NODE_ENV=production
+ENV PORT=80
+WORKDIR /app
+
+COPY --from=builder /app ./
+
+EXPOSE 80
+CMD ["node", "server.js"]
+>>>>>>> refs/remotes/origin/production
