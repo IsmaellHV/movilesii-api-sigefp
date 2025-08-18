@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateRegister, validateUserRegister, validateLogin, validateUserLogin, validateChangePassword, handleValidationErrors, transformUserFields } = require('../middleware/validation');
+const { validateUserRegister, validateUserLogin, validateChangePassword, transformUserFields } = require('../middleware/ajvValidation');
 
 /**
  * @route POST /api/auth/register
@@ -44,7 +44,6 @@ router.get('/profile',
 router.put('/change-password', 
   authenticateToken,
   validateChangePassword,
-  handleValidationErrors,
   authController.changePassword
 );
 

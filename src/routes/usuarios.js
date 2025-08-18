@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateUpdateUser, validateId, handleValidationErrors } = require('../middleware/validation');
+const { validateUpdateUser, validateId } = require('../middleware/ajvValidation');
 
 /**
  * @route GET /api/usuarios
@@ -22,7 +22,6 @@ router.get('/',
 router.get('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   usuarioController.getUsuarioById
 );
 
@@ -35,7 +34,6 @@ router.put('/:id',
   authenticateToken,
   validateId,
   validateUpdateUser,
-  handleValidationErrors,
   usuarioController.updateUsuario
 );
 
@@ -47,7 +45,6 @@ router.put('/:id',
 router.delete('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   usuarioController.deleteUsuario
 );
 
@@ -59,7 +56,6 @@ router.delete('/:id',
 router.get('/:id/estadisticas', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   usuarioController.getUsuarioEstadisticas
 );
 

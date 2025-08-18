@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 .vite
 .env
+.env.prod
 .vercel
 .trae
 .vscode

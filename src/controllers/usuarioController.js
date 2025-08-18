@@ -1,71 +1,59 @@
 const bcrypt = require('bcryptjs');
 const { executeQuery } = require('../config/database');
 
+const toPosInt = (v, fallback) => {
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+
 // Obtener todos los usuarios (solo para administradores)
 const getAllUsuarios = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search } = req.query;
+    // saneo fuerte con fallback sensato
+    const pageNum = toPosInt(req.query.page, 1);
+    const limitNum = toPosInt(req.query.limit, 10);
+    const offsetNum = (pageNum - 1) * limitNum;
 
-    let query = `
+    const search = (req.query.search || '').trim();
+
+    let baseQuery = `
       SELECT 
         idUsuario, 
         nombreUsuario, 
         apellidoUsuario, 
-        correoUsuario,
-        DATE_FORMAT(fechaRegistro, '%Y-%m-%d %H:%i:%s') as fechaRegistro
+        correoUsuario
       FROM USUARIO
     `;
+
+    let whereClause = '';
     
-    const params = [];
-
     if (search) {
-      query += ` WHERE 
-        nombreUsuario LIKE ? OR 
-        apellidoUsuario LIKE ? OR 
-        correoUsuario LIKE ?
-      `;
-      const searchTerm = `%${search}%`;
-      params.push(searchTerm, searchTerm, searchTerm);
+      whereClause = ` WHERE nombreUsuario LIKE "%${search}%" OR apellidoUsuario LIKE "%${search}%" OR correoUsuario LIKE "%${search}%"`;
     }
+    
+    const mainQuery = baseQuery + whereClause + ` ORDER BY idUsuario DESC LIMIT ${limitNum} OFFSET ${offsetNum}`;
+    
+    const countQuery = 'SELECT COUNT(*) as total FROM USUARIO' + whereClause;
 
-    query += ' ORDER BY fechaRegistro DESC';
-
-    // Obtener total de registros para paginación
-    let countQuery = 'SELECT COUNT(*) as total FROM USUARIO';
-    if (search) {
-      countQuery += ` WHERE 
-        nombreUsuario LIKE ? OR 
-        apellidoUsuario LIKE ? OR 
-        correoUsuario LIKE ?
-      `;
-    }
-
-    const [usuarios, totalResult] = await Promise.all([
-      executeQuery(query + ' LIMIT ? OFFSET ?', [...params, parseInt(limit), (page - 1) * limit]),
-      executeQuery(countQuery, search ? params : [])
-    ]);
+    const usuarios = await executeQuery(mainQuery);
+    const totalResult = await executeQuery(countQuery);
 
     const total = totalResult[0].total;
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limitNum);
 
     res.json({
       success: true,
-      data: {
-        usuarios,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalItems: total,
-          itemsPerPage: parseInt(limit)
-        }
-      }
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limitNum,
+      },
+      data: usuarios,
     });
   } catch (error) {
     console.error('Error obteniendo usuarios:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error interno del servidor'
-    });
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
   }
 };
 
@@ -79,7 +67,7 @@ const getUsuarioById = async (req, res) => {
     if (parseInt(id) !== requestingUserId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permisos para acceder a esta información'
+        error: 'No tienes permisos para acceder a esta información',
       });
     }
 
@@ -88,29 +76,28 @@ const getUsuarioById = async (req, res) => {
         idUsuario, 
         nombreUsuario, 
         apellidoUsuario, 
-        correoUsuario,
-        DATE_FORMAT(fechaRegistro, '%Y-%m-%d %H:%i:%s') as fechaRegistro
+        correoUsuario
        FROM USUARIO 
        WHERE idUsuario = ?`,
-      [id]
+      [id],
     );
 
     if (usuarios.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Usuario no encontrado'
+        error: 'Usuario no encontrado',
       });
     }
 
     res.json({
       success: true,
-      data: usuarios[0]
+      data: usuarios[0],
     });
   } catch (error) {
     console.error('Error obteniendo usuario:', error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
     });
   }
 };
@@ -126,41 +113,32 @@ const updateUsuario = async (req, res) => {
     if (parseInt(id) !== requestingUserId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permisos para modificar esta información'
+        error: 'No tienes permisos para modificar esta información',
       });
     }
 
     // Verificar si el usuario existe
-    const existingUser = await executeQuery(
-      'SELECT idUsuario FROM USUARIO WHERE idUsuario = ?',
-      [id]
-    );
+    const existingUser = await executeQuery(`SELECT idUsuario FROM USUARIO WHERE idUsuario = ${id}`);
 
     if (existingUser.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Usuario no encontrado'
+        error: 'Usuario no encontrado',
       });
     }
 
     // Verificar si el nuevo correo ya está en uso por otro usuario
-    const emailCheck = await executeQuery(
-      'SELECT idUsuario FROM USUARIO WHERE correoUsuario = ? AND idUsuario != ?',
-      [correoUsuario, id]
-    );
+    const emailCheck = await executeQuery(`SELECT correoUsuario FROM USUARIO WHERE correoUsuario = '${correoUsuario}' AND idUsuario != ${id}`);
 
     if (emailCheck.length > 0) {
       return res.status(400).json({
         success: false,
-        error: 'El correo electrónico ya está en uso por otro usuario'
+        error: 'El correo electrónico ya está en uso por otro usuario',
       });
     }
 
     // Actualizar la información del usuario
-    await executeQuery(
-      'UPDATE USUARIO SET nombreUsuario = ?, apellidoUsuario = ?, correoUsuario = ? WHERE idUsuario = ?',
-      [nombreUsuario, apellidoUsuario, correoUsuario, id]
-    );
+    await executeQuery(`UPDATE USUARIO SET nombreUsuario = '${nombreUsuario}', apellidoUsuario = '${apellidoUsuario}', correoUsuario = '${correoUsuario}' WHERE idUsuario = ${id}`);
 
     // Obtener la información actualizada
     const usuarioActualizado = await executeQuery(
@@ -168,23 +146,22 @@ const updateUsuario = async (req, res) => {
         idUsuario, 
         nombreUsuario, 
         apellidoUsuario, 
-        correoUsuario,
-        DATE_FORMAT(fechaRegistro, '%Y-%m-%d %H:%i:%s') as fechaRegistro
+        correoUsuario
        FROM USUARIO 
        WHERE idUsuario = ?`,
-      [id]
+      [id],
     );
 
     res.json({
       success: true,
       message: 'Usuario actualizado exitosamente',
-      data: usuarioActualizado[0]
+      data: usuarioActualizado[0],
     });
   } catch (error) {
     console.error('Error actualizando usuario:', error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
     });
   }
 };
@@ -199,48 +176,45 @@ const deleteUsuario = async (req, res) => {
     if (parseInt(id) !== requestingUserId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permisos para eliminar esta cuenta'
+        error: 'No tienes permisos para eliminar esta cuenta',
       });
     }
 
     // Verificar si el usuario existe
-    const existingUser = await executeQuery(
-      'SELECT idUsuario FROM USUARIO WHERE idUsuario = ?',
-      [id]
-    );
+    const existingUser = await executeQuery(`SELECT idUsuario FROM USUARIO WHERE idUsuario = ${id}`);
 
     if (existingUser.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Usuario no encontrado'
+        error: 'Usuario no encontrado',
       });
     }
 
     // Verificar si el usuario tiene transacciones asociadas
     const [ingresoCount, gastoCount] = await Promise.all([
-      executeQuery('SELECT COUNT(*) as count FROM INGRESO WHERE idUsuario = ?', [id]),
-      executeQuery('SELECT COUNT(*) as count FROM GASTO WHERE idUsuario = ?', [id])
+      executeQuery(`SELECT COUNT(*) as count FROM INGRESO WHERE idUsuario = ${id}`),
+      executeQuery(`SELECT COUNT(*) as count FROM GASTO WHERE idUsuario = ${id}`)
     ]);
 
     if (ingresoCount[0].count > 0 || gastoCount[0].count > 0) {
       return res.status(400).json({
         success: false,
-        error: 'No se puede eliminar la cuenta porque tiene transacciones asociadas. Contacte al administrador.'
+        error: 'No se puede eliminar la cuenta porque tiene transacciones asociadas. Contacte al administrador.',
       });
     }
 
     // Eliminar el usuario
-    await executeQuery('DELETE FROM USUARIO WHERE idUsuario = ?', [id]);
+    await executeQuery(`DELETE FROM USUARIO WHERE idUsuario = ${id}`);
 
     res.json({
       success: true,
-      message: 'Cuenta eliminada exitosamente'
+      message: 'Cuenta eliminada exitosamente',
     });
   } catch (error) {
     console.error('Error eliminando usuario:', error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
     });
   }
 };
@@ -255,53 +229,51 @@ const getUsuarioEstadisticas = async (req, res) => {
     if (parseInt(id) !== requestingUserId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permisos para acceder a esta información'
+        error: 'No tienes permisos para acceder a esta información',
       });
     }
 
     // Obtener estadísticas básicas
-    const [ingresoStats, gastoStats, fechaRegistro] = await Promise.all([
-      executeQuery(`
+    const [ingresoStats, gastoStats] = await Promise.all([
+      executeQuery(
+        `
         SELECT 
           COUNT(*) as totalIngresos,
-          COALESCE(SUM(montoIngreso), 0) as montoTotalIngresos,
-          COALESCE(AVG(montoIngreso), 0) as promedioIngresos
+          COALESCE(SUM(monto), 0) as montoTotalIngresos,
+          COALESCE(AVG(monto), 0) as promedioIngresos
         FROM INGRESO 
         WHERE idUsuario = ?
-      `, [id]),
-      executeQuery(`
+      `,
+        [id],
+      ),
+      executeQuery(
+        `
         SELECT 
           COUNT(*) as totalGastos,
-          COALESCE(SUM(montoGasto), 0) as montoTotalGastos,
-          COALESCE(AVG(montoGasto), 0) as promedioGastos
+          COALESCE(SUM(monto), 0) as montoTotalGastos,
+          COALESCE(AVG(monto), 0) as promedioGastos
         FROM GASTO 
         WHERE idUsuario = ?
-      `, [id]),
-      executeQuery(`
-        SELECT 
-          DATE_FORMAT(fechaRegistro, '%Y-%m-%d') as fechaRegistro,
-          DATEDIFF(CURDATE(), fechaRegistro) as diasRegistrado
-        FROM USUARIO 
-        WHERE idUsuario = ?
-      `, [id])
+      `,
+        [id],
+      ),
     ]);
 
     const estadisticas = {
       ingresos: ingresoStats[0],
       gastos: gastoStats[0],
       balance: parseFloat(ingresoStats[0].montoTotalIngresos) - parseFloat(gastoStats[0].montoTotalGastos),
-      usuario: fechaRegistro[0]
     };
 
     res.json({
       success: true,
-      data: estadisticas
+      data: estadisticas,
     });
   } catch (error) {
     console.error('Error obteniendo estadísticas del usuario:', error);
     res.status(500).json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
     });
   }
 };
@@ -311,5 +283,5 @@ module.exports = {
   getUsuarioById,
   updateUsuario,
   deleteUsuario,
-  getUsuarioEstadisticas
+  getUsuarioEstadisticas,
 };

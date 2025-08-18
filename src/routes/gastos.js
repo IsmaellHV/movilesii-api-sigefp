@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const gastoController = require('../controllers/gastoController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateGasto, validateId, validateTelefono, handleValidationErrors } = require('../middleware/validation');
+const { validateGasto, validateId, validateTelefono } = require('../middleware/ajvValidation');
 
 /**
  * @route GET /api/gastos
@@ -22,7 +22,6 @@ router.get('/',
 router.get('/telefono/:telefono', 
   authenticateToken,
   validateTelefono,
-  handleValidationErrors,
   gastoController.getGastosByTelefono
 );
 
@@ -34,7 +33,6 @@ router.get('/telefono/:telefono',
 router.get('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   gastoController.getGastoById
 );
 
@@ -46,7 +44,6 @@ router.get('/:id',
 router.post('/', 
   authenticateToken,
   validateGasto,
-  handleValidationErrors,
   gastoController.createGasto
 );
 
@@ -59,7 +56,6 @@ router.put('/:id',
   authenticateToken,
   validateId,
   validateGasto,
-  handleValidationErrors,
   gastoController.updateGasto
 );
 
@@ -71,7 +67,6 @@ router.put('/:id',
 router.delete('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   gastoController.deleteGasto
 );
 

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const tipoController = require('../controllers/tipoController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateType, validateId, handleValidationErrors } = require('../middleware/validation');
+const { validateType, validateId } = require('../middleware/ajvValidation');
 
 /**
  * @route GET /api/tipos
@@ -32,7 +32,6 @@ router.get('/categoria/:categoria',
 router.get('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   tipoController.getTipoById
 );
 
@@ -44,7 +43,6 @@ router.get('/:id',
 router.post('/', 
   authenticateToken,
   validateType,
-  handleValidationErrors,
   tipoController.createTipo
 );
 
@@ -57,7 +55,6 @@ router.put('/:id',
   authenticateToken,
   validateId,
   validateType,
-  handleValidationErrors,
   tipoController.updateTipo
 );
 
@@ -69,7 +66,6 @@ router.put('/:id',
 router.delete('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   tipoController.deleteTipo
 );
 

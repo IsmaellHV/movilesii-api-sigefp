@@ -12,28 +12,22 @@ const getBalanceByUser = async (req, res) => {
     // Si se proporcionan fechas, calcular balance filtrado
     let balanceFiltrado = null;
     if (fechaInicio || fechaFin) {
-      let queryIngresos = 'SELECT COALESCE(SUM(montoIngreso), 0) as totalIngresos FROM INGRESO WHERE idUsuario = ?';
-      let queryGastos = 'SELECT COALESCE(SUM(montoGasto), 0) as totalGastos FROM GASTO WHERE idUsuario = ?';
-      const paramsIngresos = [idUsuario];
-      const paramsGastos = [idUsuario];
+      let queryIngresos = `SELECT COALESCE(SUM(montoIngreso), 0) as totalIngresos FROM INGRESO WHERE idUsuario = ${idUsuario}`;
+      let queryGastos = `SELECT COALESCE(SUM(montoGasto), 0) as totalGastos FROM GASTO WHERE idUsuario = ${idUsuario}`;
 
       if (fechaInicio) {
-        queryIngresos += ' AND fechaIngreso >= ?';
-        queryGastos += ' AND fechaGasto >= ?';
-        paramsIngresos.push(fechaInicio);
-        paramsGastos.push(fechaInicio);
+        queryIngresos += ` AND fechaIngreso >= '${fechaInicio}'`;
+        queryGastos += ` AND fechaGasto >= '${fechaInicio}'`;
       }
 
       if (fechaFin) {
-        queryIngresos += ' AND fechaIngreso <= ?';
-        queryGastos += ' AND fechaGasto <= ?';
-        paramsIngresos.push(fechaFin);
-        paramsGastos.push(fechaFin);
+        queryIngresos += ` AND fechaIngreso <= '${fechaFin}'`;
+        queryGastos += ` AND fechaGasto <= '${fechaFin}'`;
       }
 
       const [ingresosFiltrados, gastosFiltrados] = await Promise.all([
-        executeQuery(queryIngresos, paramsIngresos),
-        executeQuery(queryGastos, paramsGastos)
+        executeQuery(queryIngresos),
+        executeQuery(queryGastos)
       ]);
 
       balanceFiltrado = {
@@ -68,17 +62,17 @@ const getResumenFinanciero = async (req, res) => {
     const { fechaInicio, fechaFin } = req.query;
 
     // Construir consultas base
-    let whereClause = 'WHERE idUsuario = ?';
-    const params = [idUsuario];
+    let whereClauseIngresos = `WHERE idUsuario = ${idUsuario}`;
+    let whereClauseGastos = `WHERE idUsuario = ${idUsuario}`;
 
     if (fechaInicio) {
-      whereClause += ' AND (fechaIngreso >= ? OR fechaGasto >= ?)';
-      params.push(fechaInicio, fechaInicio);
+      whereClauseIngresos += ` AND fechaIngreso >= '${fechaInicio}'`;
+      whereClauseGastos += ` AND fechaGasto >= '${fechaInicio}'`;
     }
 
     if (fechaFin) {
-      whereClause += ' AND (fechaIngreso <= ? OR fechaGasto <= ?)';
-      params.push(fechaFin, fechaFin);
+      whereClauseIngresos += ` AND fechaIngreso <= '${fechaFin}'`;
+      whereClauseGastos += ` AND fechaGasto <= '${fechaFin}'`;
     }
 
     // Obtener resumen de ingresos por tipo
@@ -90,10 +84,10 @@ const getResumenFinanciero = async (req, res) => {
         AVG(i.montoIngreso) as promedio
       FROM INGRESO i
       INNER JOIN TIPO t ON i.idTipo = t.idTipo
-      ${whereClause.replace('fechaGasto', 'fechaIngreso')}
+      ${whereClauseIngresos}
       GROUP BY t.idTipo, t.nombreTipo
       ORDER BY total DESC
-    `, params.filter((_, index) => index === 0 || index === 1 || index === 3));
+    `);
 
     // Obtener resumen de gastos por tipo
     const resumenGastos = await executeQuery(`
@@ -104,10 +98,10 @@ const getResumenFinanciero = async (req, res) => {
         AVG(g.montoGasto) as promedio
       FROM GASTO g
       INNER JOIN TIPO t ON g.idTipo = t.idTipo
-      ${whereClause.replace('fechaIngreso', 'fechaGasto')}
+      ${whereClauseGastos}
       GROUP BY t.idTipo, t.nombreTipo
       ORDER BY total DESC
-    `, params.filter((_, index) => index === 0 || index === 2 || index === 4));
+    `);
 
     // Obtener resumen de gastos por método de pago
     const resumenMetodosPago = await executeQuery(`
@@ -118,10 +112,10 @@ const getResumenFinanciero = async (req, res) => {
         AVG(g.montoGasto) as promedio
       FROM GASTO g
       INNER JOIN TIPO mp ON g.idMetodoPago = mp.idTipo
-      ${whereClause.replace('fechaIngreso', 'fechaGasto')}
+      ${whereClauseGastos}
       GROUP BY mp.idTipo, mp.nombreTipo
       ORDER BY total DESC
-    `, params.filter((_, index) => index === 0 || index === 2 || index === 4));
+    `);
 
     // Calcular balance usando stored procedure
     const balance = await executeStoredProcedure('CalcularBalance', [idUsuario]);
@@ -136,7 +130,7 @@ const getResumenFinanciero = async (req, res) => {
         t.nombreTipo as categoria
       FROM INGRESO i
       INNER JOIN TIPO t ON i.idTipo = t.idTipo
-      WHERE i.idUsuario = ?
+      WHERE i.idUsuario = ${idUsuario}
       UNION ALL
       SELECT 
         'gasto' as tipo,
@@ -146,10 +140,10 @@ const getResumenFinanciero = async (req, res) => {
         t.nombreTipo as categoria
       FROM GASTO g
       INNER JOIN TIPO t ON g.idTipo = t.idTipo
-      WHERE g.idUsuario = ?
+      WHERE g.idUsuario = ${idUsuario}
       ORDER BY fecha DESC
       LIMIT 10
-    `, [idUsuario, idUsuario]);
+    `);
 
     res.json({
       success: true,
@@ -188,10 +182,10 @@ const getEstadisticasMensuales = async (req, res) => {
         COUNT(*) as cantidad,
         SUM(montoIngreso) as total
       FROM INGRESO
-      WHERE idUsuario = ? AND YEAR(fechaIngreso) = ?
+      WHERE idUsuario = ${idUsuario} AND YEAR(fechaIngreso) = ${año}
       GROUP BY MONTH(fechaIngreso), MONTHNAME(fechaIngreso)
       ORDER BY mes
-    `, [idUsuario, año]);
+    `);
 
     // Obtener estadísticas mensuales de gastos
     const estadisticasGastos = await executeQuery(`
@@ -201,10 +195,10 @@ const getEstadisticasMensuales = async (req, res) => {
         COUNT(*) as cantidad,
         SUM(montoGasto) as total
       FROM GASTO
-      WHERE idUsuario = ? AND YEAR(fechaGasto) = ?
+      WHERE idUsuario = ${idUsuario} AND YEAR(fechaGasto) = ${año}
       GROUP BY MONTH(fechaGasto), MONTHNAME(fechaGasto)
       ORDER BY mes
-    `, [idUsuario, año]);
+    `);
 
     // Combinar estadísticas por mes
     const estadisticasCombinadas = [];

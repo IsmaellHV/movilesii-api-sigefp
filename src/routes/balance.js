@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const balanceController = require('../controllers/balanceController');
 const { authenticateToken } = require('../middleware/auth');
-const { handleValidationErrors } = require('../middleware/validation');
 
 /**
  * @route GET /api/balance

@@ -8,8 +8,7 @@ const createGasto = async (req, res) => {
 
     // Verificar que el tipo existe y es de categoría 'Gasto'
     const tipo = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idTipo]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idTipo}`
     );
 
     if (tipo.length === 0) {
@@ -28,8 +27,7 @@ const createGasto = async (req, res) => {
 
     // Verificar que el método de pago existe y es de categoría 'MetodoPago'
     const metodoPago = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idMetodoPago]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idMetodoPago}`
     );
 
     if (metodoPago.length === 0) {
@@ -65,10 +63,9 @@ const createGasto = async (req, res) => {
        FROM GASTO g 
        INNER JOIN TIPO t ON g.idTipo = t.idTipo 
        INNER JOIN TIPO mp ON g.idMetodoPago = mp.idTipo
-       WHERE g.idUsuario = ? 
+       WHERE g.idUsuario = ${idUsuario} 
        ORDER BY g.idGasto DESC 
-       LIMIT 1`,
-      [idUsuario]
+       LIMIT 1`
     );
 
     res.status(201).json({
@@ -202,8 +199,7 @@ const getGastoById = async (req, res) => {
        FROM GASTO g 
        INNER JOIN TIPO t ON g.idTipo = t.idTipo 
        INNER JOIN TIPO mp ON g.idMetodoPago = mp.idTipo
-       WHERE g.idGasto = ? AND g.idUsuario = ?`,
-      [id, idUsuario]
+       WHERE g.idGasto = ${id} AND g.idUsuario = ${idUsuario}`
     );
 
     if (gasto.length === 0) {
@@ -235,8 +231,7 @@ const updateGasto = async (req, res) => {
 
     // Verificar que el gasto existe y pertenece al usuario
     const existingGasto = await executeQuery(
-      'SELECT idGasto FROM GASTO WHERE idGasto = ? AND idUsuario = ?',
-      [id, idUsuario]
+      `SELECT idGasto FROM GASTO WHERE idGasto = ${id} AND idUsuario = ${idUsuario}`
     );
 
     if (existingGasto.length === 0) {
@@ -248,8 +243,7 @@ const updateGasto = async (req, res) => {
 
     // Verificar que el tipo existe y es de categoría 'Gasto'
     const tipo = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idTipo]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idTipo}`
     );
 
     if (tipo.length === 0 || tipo[0].categoria !== 'Gasto') {
@@ -261,8 +255,7 @@ const updateGasto = async (req, res) => {
 
     // Verificar que el método de pago existe y es de categoría 'MetodoPago'
     const metodoPago = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idMetodoPago]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idMetodoPago}`
     );
 
     if (metodoPago.length === 0 || metodoPago[0].categoria !== 'MetodoPago') {
@@ -274,8 +267,7 @@ const updateGasto = async (req, res) => {
 
     // Actualizar el gasto
     await executeQuery(
-      'UPDATE GASTO SET descripcionGasto = ?, montoGasto = ?, fechaGasto = ?, idTipo = ?, idMetodoPago = ? WHERE idGasto = ? AND idUsuario = ?',
-      [descripcionGasto, montoGasto, fechaGasto, idTipo, idMetodoPago, id, idUsuario]
+      `UPDATE GASTO SET descripcionGasto = '${descripcionGasto}', montoGasto = ${montoGasto}, fechaGasto = '${fechaGasto}', idTipo = ${idTipo}, idMetodoPago = ${idMetodoPago} WHERE idGasto = ${id} AND idUsuario = ${idUsuario}`
     );
 
     // Obtener el gasto actualizado
@@ -287,8 +279,7 @@ const updateGasto = async (req, res) => {
        FROM GASTO g 
        INNER JOIN TIPO t ON g.idTipo = t.idTipo 
        INNER JOIN TIPO mp ON g.idMetodoPago = mp.idTipo
-       WHERE g.idGasto = ? AND g.idUsuario = ?`,
-      [id, idUsuario]
+       WHERE g.idGasto = ${id} AND g.idUsuario = ${idUsuario}`
     );
 
     res.json({
@@ -313,8 +304,7 @@ const deleteGasto = async (req, res) => {
 
     // Verificar que el gasto existe y pertenece al usuario
     const existingGasto = await executeQuery(
-      'SELECT idGasto FROM GASTO WHERE idGasto = ? AND idUsuario = ?',
-      [id, idUsuario]
+      `SELECT idGasto FROM GASTO WHERE idGasto = ${id} AND idUsuario = ${idUsuario}`
     );
 
     if (existingGasto.length === 0) {
@@ -354,22 +344,18 @@ const getGastosResumen = async (req, res) => {
         COALESCE(MAX(montoGasto), 0) as montoMaximo,
         COALESCE(MIN(montoGasto), 0) as montoMinimo
       FROM GASTO 
-      WHERE idUsuario = ?
+      WHERE idUsuario = ${idUsuario}
     `;
-    
-    const params = [idUsuario];
 
     if (fechaInicio) {
-      query += ' AND fechaGasto >= ?';
-      params.push(fechaInicio);
+      query += ` AND fechaGasto >= '${fechaInicio}'`;
     }
 
     if (fechaFin) {
-      query += ' AND fechaGasto <= ?';
-      params.push(fechaFin);
+      query += ` AND fechaGasto <= '${fechaFin}'`;
     }
 
-    const resumen = await executeQuery(query, params);
+    const resumen = await executeQuery(query);
 
     res.json({
       success: true,

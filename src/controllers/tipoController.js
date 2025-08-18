@@ -216,7 +216,7 @@ const deleteTipo = async (req, res) => {
       });
     }
 
-    await executeQuery('DELETE FROM TIPO WHERE idTipo = ?', [id]);
+    await executeQuery(`DELETE FROM TIPO WHERE idTipo = ${id}`);
 
     res.json({
       success: true,

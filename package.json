@@ -21,6 +21,8 @@
   "author": "CIBERTEC - Desarrollo de Aplicaciones Móviles II",
   "license": "ISC",
   "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

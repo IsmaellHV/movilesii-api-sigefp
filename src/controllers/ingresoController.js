@@ -8,8 +8,7 @@ const createIngreso = async (req, res) => {
 
     // Verificar que el tipo existe y es de categoría 'Ingreso'
     const tipo = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idTipo]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idTipo}`
     );
 
     if (tipo.length === 0) {
@@ -42,10 +41,9 @@ const createIngreso = async (req, res) => {
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
-       WHERE i.idUsuario = ? 
+       WHERE i.idUsuario = ${idUsuario} 
        ORDER BY i.idIngreso DESC 
-       LIMIT 1`,
-      [idUsuario]
+       LIMIT 1`
     );
 
     res.status(201).json({
@@ -133,8 +131,7 @@ const getIngresoById = async (req, res) => {
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
-       WHERE i.idIngreso = ? AND i.idUsuario = ?`,
-      [id, idUsuario]
+       WHERE i.idIngreso = ${id} AND i.idUsuario = ${idUsuario}`
     );
 
     if (ingreso.length === 0) {
@@ -166,8 +163,7 @@ const updateIngreso = async (req, res) => {
 
     // Verificar que el ingreso existe y pertenece al usuario
     const existingIngreso = await executeQuery(
-      'SELECT idIngreso FROM INGRESO WHERE idIngreso = ? AND idUsuario = ?',
-      [id, idUsuario]
+      `SELECT idIngreso FROM INGRESO WHERE idIngreso = ${id} AND idUsuario = ${idUsuario}`
     );
 
     if (existingIngreso.length === 0) {
@@ -179,8 +175,7 @@ const updateIngreso = async (req, res) => {
 
     // Verificar que el tipo existe y es de categoría 'Ingreso'
     const tipo = await executeQuery(
-      'SELECT idTipo, categoria FROM TIPO WHERE idTipo = ?',
-      [idTipo]
+      `SELECT idTipo, categoria FROM TIPO WHERE idTipo = ${idTipo}`
     );
 
     if (tipo.length === 0) {
@@ -199,8 +194,7 @@ const updateIngreso = async (req, res) => {
 
     // Actualizar el ingreso
     await executeQuery(
-      'UPDATE INGRESO SET descripcionIngreso = ?, montoIngreso = ?, fechaIngreso = ?, idTipo = ? WHERE idIngreso = ? AND idUsuario = ?',
-      [descripcionIngreso, montoIngreso, fechaIngreso, idTipo, id, idUsuario]
+      `UPDATE INGRESO SET descripcionIngreso = '${descripcionIngreso}', montoIngreso = ${montoIngreso}, fechaIngreso = '${fechaIngreso}', idTipo = ${idTipo} WHERE idIngreso = ${id} AND idUsuario = ${idUsuario}`
     );
 
     // Obtener el ingreso actualizado
@@ -210,8 +204,7 @@ const updateIngreso = async (req, res) => {
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
-       WHERE i.idIngreso = ? AND i.idUsuario = ?`,
-      [id, idUsuario]
+       WHERE i.idIngreso = ${id} AND i.idUsuario = ${idUsuario}`
     );
 
     res.json({
@@ -236,8 +229,7 @@ const deleteIngreso = async (req, res) => {
 
     // Verificar que el ingreso existe y pertenece al usuario
     const existingIngreso = await executeQuery(
-      'SELECT idIngreso FROM INGRESO WHERE idIngreso = ? AND idUsuario = ?',
-      [id, idUsuario]
+      `SELECT idIngreso FROM INGRESO WHERE idIngreso = ${id} AND idUsuario = ${idUsuario}`
     );
 
     if (existingIngreso.length === 0) {
@@ -277,22 +269,18 @@ const getIngresosResumen = async (req, res) => {
         COALESCE(MAX(montoIngreso), 0) as montoMaximo,
         COALESCE(MIN(montoIngreso), 0) as montoMinimo
       FROM INGRESO 
-      WHERE idUsuario = ?
+      WHERE idUsuario = ${idUsuario}
     `;
-    
-    const params = [idUsuario];
 
     if (fechaInicio) {
-      query += ' AND fechaIngreso >= ?';
-      params.push(fechaInicio);
+      query += ` AND fechaIngreso >= '${fechaInicio}'`;
     }
 
     if (fechaFin) {
-      query += ' AND fechaIngreso <= ?';
-      params.push(fechaFin);
+      query += ` AND fechaIngreso <= '${fechaFin}'`;
     }
 
-    const resumen = await executeQuery(query, params);
+    const resumen = await executeQuery(query);
 
     res.json({
       success: true,

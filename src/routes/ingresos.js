@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ingresoController = require('../controllers/ingresoController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateIngreso, validateId, handleValidationErrors } = require('../middleware/validation');
+const { validateIngreso, validateId } = require('../middleware/ajvValidation');
 
 /**
  * @route GET /api/ingresos
@@ -22,7 +22,6 @@ router.get('/',
 router.get('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   ingresoController.getIngresoById
 );
 
@@ -34,7 +33,6 @@ router.get('/:id',
 router.post('/', 
   authenticateToken,
   validateIngreso,
-  handleValidationErrors,
   ingresoController.createIngreso
 );
 
@@ -47,7 +45,6 @@ router.put('/:id',
   authenticateToken,
   validateId,
   validateIngreso,
-  handleValidationErrors,
   ingresoController.updateIngreso
 );
 
@@ -59,7 +56,6 @@ router.put('/:id',
 router.delete('/:id', 
   authenticateToken,
   validateId,
-  handleValidationErrors,
   ingresoController.deleteIngreso
 );
 

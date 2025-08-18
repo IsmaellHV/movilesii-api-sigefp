@@ -149,7 +149,8 @@ const errorHandler = (err, req, res, next) => {
     error = {
       statusCode: err.statusCode || 400,
       message: err.message,
-      type: err.type || 'OPERATIONAL_ERROR'
+      type: err.type || 'OPERATIONAL_ERROR',
+      errors: err.errors // Preservar errores de validación específicos
     };
   }
 
