@@ -14,14 +14,14 @@ let server;
 async function startServer() {
   try {
     console.log('🚀 Iniciando servidor...');
-    
+
     // Verificar conexión a la base de datos
     console.log('📊 Verificando conexión a la base de datos...');
     await testConnection();
     console.log('✅ Conexión a la base de datos establecida correctamente');
-    
+
     // Iniciar el servidor
-    server = app.listen(PORT, HOST, () => {
+    server = app.listen(PORT, () => {
       console.log('🎉 Servidor iniciado exitosamente');
       console.log(`📍 Servidor ejecutándose en: http://${HOST}:${PORT}`);
       console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
@@ -36,14 +36,13 @@ async function startServer() {
       console.log(`   • Balance: http://${HOST}:${PORT}/api/${process.env.PREFIJO || 'v1'}/balance`);
       console.log('\n🛑 Para detener el servidor: Ctrl+C');
     });
-    
+
     // Configurar timeout del servidor
     server.timeout = 30000; // 30 segundos
-    
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error.message);
     console.error('📋 Detalles del error:', error);
-    
+
     // Verificar errores comunes
     if (error.code === 'EADDRINUSE') {
       console.error(`🚫 El puerto ${PORT} ya está en uso.`);
@@ -58,7 +57,7 @@ async function startServer() {
       console.error('   2. Las credenciales en el archivo .env');
       console.error('   3. Que la base de datos exista');
     }
-    
+
     process.exit(1);
   }
 }
@@ -68,7 +67,7 @@ async function startServer() {
  */
 async function stopServer() {
   console.log('\n🛑 Cerrando servidor...');
-  
+
   try {
     // Cerrar el servidor HTTP
     if (server) {
@@ -79,14 +78,13 @@ async function stopServer() {
         });
       });
     }
-    
+
     // Cerrar conexiones de base de datos
     await closePool();
     console.log('✅ Conexiones de base de datos cerradas');
-    
+
     console.log('👋 Servidor cerrado correctamente');
     process.exit(0);
-    
   } catch (error) {
     console.error('❌ Error al cerrar el servidor:', error.message);
     process.exit(1);
@@ -118,5 +116,5 @@ if (require.main === module) {
 module.exports = {
   startServer,
   stopServer,
-  server: () => server
+  server: () => server,
 };
