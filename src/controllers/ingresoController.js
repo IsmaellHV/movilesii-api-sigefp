@@ -60,55 +60,72 @@ const createIngreso = async (req, res) => {
   }
 };
 
-// Listar ingresos del usuario usando stored procedure
+// Listar ingresos del usuario
 const getIngresosByUser = async (req, res) => {
   try {
-    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
+    const idUsuario = parseInt(req.params.userId);
     const { page = 1, limit = 10, fechaInicio, fechaFin, idTipo } = req.query;
+    
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
 
-    // Ejecutar stored procedure para listar ingresos
-    const ingresos = await executeStoredProcedure('ListarIngresosPorUsuario', [idUsuario]);
-
-    let filteredIngresos = ingresos;
-
-    // Aplicar filtros adicionales si se proporcionan
+    // Construir la consulta base
+    let whereConditions = [`i.idUsuario = ${idUsuario}`];
+    
     if (fechaInicio) {
-      filteredIngresos = filteredIngresos.filter(ingreso => 
-        new Date(ingreso.fechaIngreso) >= new Date(fechaInicio)
-      );
+      whereConditions.push(`i.fecha >= '${fechaInicio}'`);
     }
-
+    
     if (fechaFin) {
-      filteredIngresos = filteredIngresos.filter(ingreso => 
-        new Date(ingreso.fechaIngreso) <= new Date(fechaFin)
-      );
+      whereConditions.push(`i.fecha <= '${fechaFin}'`);
     }
-
+    
     if (idTipo) {
-      filteredIngresos = filteredIngresos.filter(ingreso => 
-        ingreso.idTipo == idTipo
-      );
+      whereConditions.push(`i.idTipo = ${parseInt(idTipo)}`);
     }
 
-    // Paginación
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedIngresos = filteredIngresos.slice(startIndex, endIndex);
+    const whereClause = whereConditions.join(' AND ');
 
-    // Calcular total de páginas
-    const totalPages = Math.ceil(filteredIngresos.length / limit);
+    // Consulta para obtener el total de registros
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM INGRESO i 
+      WHERE ${whereClause}
+    `;
+    
+    const countResult = await executeQuery(countQuery);
+    const totalItems = countResult[0].total;
+    const totalPages = Math.ceil(totalItems / limitNum);
+
+    // Consulta para obtener los datos paginados
+    const dataQuery = `
+      SELECT 
+        i.idIngreso,
+        i.descripcion,
+        i.monto,
+        DATE_FORMAT(i.fecha, '%Y-%m-%d') as fecha,
+        i.idUsuario,
+        i.idTipo,
+        t.nombreTipo
+      FROM INGRESO i
+      LEFT JOIN TIPO t ON i.idTipo = t.idTipo
+      WHERE ${whereClause}
+      ORDER BY i.fecha DESC
+      LIMIT ${limitNum} OFFSET ${offset}
+    `;
+
+    const ingresos = await executeQuery(dataQuery);
 
     res.json({
       success: true,
-      data: {
-        ingresos: paginatedIngresos,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalItems: filteredIngresos.length,
-          itemsPerPage: parseInt(limit)
-        }
-      }
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalItems,
+        itemsPerPage: limitNum
+      },
+      data: ingresos
     });
   } catch (error) {
     console.error('Error obteniendo ingresos:', error);

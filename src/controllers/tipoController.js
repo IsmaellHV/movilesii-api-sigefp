@@ -3,12 +3,45 @@ const { executeQuery } = require('../config/database');
 // Obtener todos los tipos
 const getAllTipos = async (req, res) => {
   try {
-    const tipos = await executeQuery(
-      'SELECT idTipo, nombreTipo, categoria FROM TIPO ORDER BY categoria, nombreTipo'
-    );
+    const { page = 1, limit = 10, categoria, search } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offsetNum = (pageNum - 1) * limitNum;
+
+    let whereClause = '';
+    let params = [];
+
+    if (categoria) {
+      whereClause += ' WHERE categoria = ?';
+      params.push(categoria);
+    }
+
+    if (search) {
+      if (whereClause) {
+        whereClause += ' AND nombreTipo LIKE ?';
+      } else {
+        whereClause += ' WHERE nombreTipo LIKE ?';
+      }
+      params.push(`%${search}%`);
+    }
+
+    const countQuery = 'SELECT COUNT(*) as total FROM TIPO' + whereClause;
+    const mainQuery = 'SELECT idTipo, nombreTipo, categoria FROM TIPO' + whereClause + ` ORDER BY categoria, nombreTipo LIMIT ${limitNum} OFFSET ${offsetNum}`;
+    
+    const totalResult = await executeQuery(countQuery, params);
+    const tipos = await executeQuery(mainQuery, params);
+
+    const total = totalResult[0].total;
+    const totalPages = Math.ceil(total / limitNum);
 
     res.json({
       success: true,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limitNum
+      },
       data: tipos
     });
   } catch (error) {

@@ -84,61 +84,73 @@ const createGasto = async (req, res) => {
   }
 };
 
-// Listar gastos del usuario usando stored procedure
+// Listar gastos del usuario
 const getGastosByUser = async (req, res) => {
   try {
-    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
+    const idUsuario = parseInt(req.params.userId); // TEMPORAL: Usando parámetro de URL para pruebas
     const { page = 1, limit = 10, fechaInicio, fechaFin, idTipo, idMetodoPago } = req.query;
 
-    // Ejecutar stored procedure para listar gastos por usuario
-    const gastos = await executeStoredProcedure('ListarGastosPorUsuario', [idUsuario]);
+    // Construir consulta SQL con filtros
+    let whereClause = 'WHERE g.idUsuario = ?';
+    let params = [idUsuario];
 
-    let filteredGastos = gastos;
-
-    // Aplicar filtros adicionales si se proporcionan
     if (fechaInicio) {
-      filteredGastos = filteredGastos.filter(gasto => 
-        new Date(gasto.fechaGasto) >= new Date(fechaInicio)
-      );
+      whereClause += ' AND g.fecha >= ?';
+      params.push(fechaInicio);
     }
 
     if (fechaFin) {
-      filteredGastos = filteredGastos.filter(gasto => 
-        new Date(gasto.fechaGasto) <= new Date(fechaFin)
-      );
+      whereClause += ' AND g.fecha <= ?';
+      params.push(fechaFin);
     }
 
     if (idTipo) {
-      filteredGastos = filteredGastos.filter(gasto => 
-        gasto.idTipo == idTipo
-      );
+      whereClause += ' AND g.idTipo = ?';
+      params.push(idTipo);
     }
 
     if (idMetodoPago) {
-      filteredGastos = filteredGastos.filter(gasto => 
-        gasto.idMetodoPago == idMetodoPago
-      );
+      whereClause += ' AND g.idMetodoPago = ?';
+      params.push(idMetodoPago);
     }
 
-    // Paginación
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedGastos = filteredGastos.slice(startIndex, endIndex);
+    // Obtener total de registros para paginación
+    const countQuery = `SELECT COUNT(*) as total FROM GASTO g ${whereClause}`;
+    const countResult = await executeQuery(countQuery, params);
+    const totalItems = countResult[0].total;
+
+    // Calcular offset para paginación
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Consulta principal con paginación
+    const query = `
+      SELECT g.idGasto, g.descripcion, g.monto, 
+             DATE_FORMAT(g.fecha, '%Y-%m-%d') as fecha,
+             g.idUsuario, g.idTipo, g.idMetodoPago
+      FROM GASTO g 
+      ${whereClause}
+      ORDER BY g.fecha DESC, g.idGasto DESC
+      LIMIT ${limitNum} OFFSET ${offset}
+    `;
+
+    console.log('Parámetros para la consulta:', params);
+    console.log('Query:', query);
+    const gastos = await executeQuery(query, params);
 
     // Calcular total de páginas
-    const totalPages = Math.ceil(filteredGastos.length / limit);
+    const totalPages = Math.ceil(totalItems / limitNum);
 
     res.json({
       success: true,
-      data: {
-        gastos: paginatedGastos,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalItems: filteredGastos.length,
-          itemsPerPage: parseInt(limit)
-        }
-      }
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalItems,
+        itemsPerPage: limitNum
+      },
+      data: gastos
     });
   } catch (error) {
     console.error('Error obteniendo gastos:', error);
@@ -168,15 +180,13 @@ const getGastosByTelefono = async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        gastos: paginatedGastos,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalItems: gastos.length,
-          itemsPerPage: parseInt(limit)
-        }
-      }
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalItems: gastos.length,
+        itemsPerPage: parseInt(limit)
+      },
+      data: paginatedGastos
     });
   } catch (error) {
     console.error('Error obteniendo gastos por teléfono:', error);

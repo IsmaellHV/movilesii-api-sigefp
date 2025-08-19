@@ -118,3 +118,5 @@ module.exports = {
   stopServer,
   server: () => server,
 };
+
+// Forzar reinicio para actualizar configuración de DB - Contraseña actualizada
