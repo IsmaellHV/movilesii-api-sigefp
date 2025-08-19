@@ -12,19 +12,19 @@ const authenticateToken = async (req, res, next) => {
     // Obtener el token del header Authorization
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-    
+
     // Verificar si el token existe
     if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Token de acceso requerido',
-        error: 'MISSING_TOKEN'
+        error: 'MISSING_TOKEN',
       });
     }
-    
+
     // Verificar el token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    
+
     // Agregar la información del usuario al request
     req.user = {
       id: decoded.id,
@@ -33,55 +33,54 @@ const authenticateToken = async (req, res, next) => {
       apellido: decoded.apellido,
       telefono: decoded.telefono,
       iat: decoded.iat,
-      exp: decoded.exp
+      exp: decoded.exp,
     };
-    
+
     // Verificar si el token ha expirado
     const currentTime = Math.floor(Date.now() / 1000);
     if (decoded.exp < currentTime) {
       return res.status(401).json({
         success: false,
         message: 'Token expirado',
-        error: 'TOKEN_EXPIRED'
+        error: 'TOKEN_EXPIRED',
       });
     }
-    
+
     next();
-    
   } catch (error) {
     console.error('Error en autenticación:', error);
-    
+
     // Manejar diferentes tipos de errores JWT
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
         success: false,
         message: 'Token inválido',
-        error: 'INVALID_TOKEN'
+        error: 'INVALID_TOKEN',
       });
     }
-    
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
         message: 'Token expirado',
         error: 'TOKEN_EXPIRED',
-        expiredAt: error.expiredAt
+        expiredAt: error.expiredAt,
       });
     }
-    
+
     if (error.name === 'NotBeforeError') {
       return res.status(401).json({
         success: false,
         message: 'Token no válido aún',
         error: 'TOKEN_NOT_ACTIVE',
-        date: error.date
+        date: error.date,
       });
     }
-    
+
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor en autenticación',
-      error: 'AUTHENTICATION_ERROR'
+      error: 'AUTHENTICATION_ERROR',
     });
   }
 };
@@ -97,7 +96,7 @@ const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     if (token) {
       try {
         const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -108,16 +107,15 @@ const optionalAuth = async (req, res, next) => {
           apellido: decoded.apellido,
           telefono: decoded.telefono,
           iat: decoded.iat,
-          exp: decoded.exp
+          exp: decoded.exp,
         };
       } catch (error) {
         // Si el token es inválido, simplemente no agregar usuario
         console.log('Token opcional inválido:', error.message);
       }
     }
-    
+
     next();
-    
   } catch (error) {
     console.error('Error en autenticación opcional:', error);
     next(); // Continuar sin autenticación
@@ -133,24 +131,23 @@ const verifyOwnership = (paramName = 'id') => {
     try {
       const resourceUserId = req.params[paramName];
       const authenticatedUserId = req.user.id;
-      
+
       // Convertir a string para comparación
       if (String(resourceUserId) !== String(authenticatedUserId)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes permisos para acceder a este recurso',
-          error: 'FORBIDDEN_ACCESS'
+          error: 'FORBIDDEN_ACCESS',
         });
       }
-      
+
       next();
-      
     } catch (error) {
       console.error('Error en verificación de propiedad:', error);
       return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: 'OWNERSHIP_VERIFICATION_ERROR'
+        error: 'OWNERSHIP_VERIFICATION_ERROR',
       });
     }
   };
@@ -164,25 +161,24 @@ const verifyRole = (allowedRoles = []) => {
   return (req, res, next) => {
     try {
       const userRole = req.user.role || 'user';
-      
+
       if (!allowedRoles.includes(userRole)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes permisos suficientes para realizar esta acción',
           error: 'INSUFFICIENT_PERMISSIONS',
           requiredRoles: allowedRoles,
-          userRole: userRole
+          userRole: userRole,
         });
       }
-      
+
       next();
-      
     } catch (error) {
       console.error('Error en verificación de rol:', error);
       return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: 'ROLE_VERIFICATION_ERROR'
+        error: 'ROLE_VERIFICATION_ERROR',
       });
     }
   };
@@ -199,7 +195,7 @@ const generateToken = (payload, expiresIn = '24h') => {
     return jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn,
       issuer: 'api-financiera',
-      audience: 'app-financiera'
+      audience: 'app-financiera',
     });
   } catch (error) {
     console.error('Error al generar token:', error);
@@ -217,7 +213,7 @@ const generateRefreshToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, {
       expiresIn: '7d',
       issuer: 'api-financiera',
-      audience: 'app-financiera'
+      audience: 'app-financiera',
     });
   } catch (error) {
     console.error('Error al generar refresh token:', error);
@@ -246,5 +242,5 @@ module.exports = {
   verifyRole,
   generateToken,
   generateRefreshToken,
-  verifyRefreshToken
+  verifyRefreshToken,
 };

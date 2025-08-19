@@ -4,7 +4,7 @@ const { executeStoredProcedure, executeQuery } = require('../config/database');
 const createGasto = async (req, res) => {
   try {
     const { descripcionGasto, montoGasto, fechaGasto, idTipo, idMetodoPago } = req.body;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el tipo existe y es de categoría 'Gasto'
     const tipo = await executeQuery(
@@ -46,18 +46,20 @@ const createGasto = async (req, res) => {
 
     // Ejecutar stored procedure para insertar gasto
     await executeStoredProcedure('InsertarGasto', [
-      descripcionGasto,
-      montoGasto,
-      fechaGasto,
       idUsuario,
+      montoGasto,
+      descripcionGasto,
+      fechaGasto,
+      null, // fechaRecordatorio (opcional)
+      idMetodoPago,
       idTipo,
-      idMetodoPago
+      null // telefonoPago (opcional)
     ]);
 
     // Obtener el gasto recién creado
     const nuevoGasto = await executeQuery(
-      `SELECT g.idGasto, g.descripcionGasto, g.montoGasto, 
-              DATE_FORMAT(g.fechaGasto, '%Y-%m-%d') as fechaGasto,
+      `SELECT g.idGasto, g.descripcion, g.monto, 
+              DATE_FORMAT(g.fecha, '%Y-%m-%d') as fecha,
               g.idUsuario, g.idTipo, g.idMetodoPago,
               t.nombreTipo as tipoGasto, mp.nombreTipo as metodoPago
        FROM GASTO g 
@@ -85,7 +87,7 @@ const createGasto = async (req, res) => {
 // Listar gastos del usuario usando stored procedure
 const getGastosByUser = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { page = 1, limit = 10, fechaInicio, fechaFin, idTipo, idMetodoPago } = req.query;
 
     // Ejecutar stored procedure para listar gastos por usuario
@@ -189,7 +191,7 @@ const getGastosByTelefono = async (req, res) => {
 const getGastoById = async (req, res) => {
   try {
     const { id } = req.params;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     const gasto = await executeQuery(
       `SELECT g.idGasto, g.descripcionGasto, g.montoGasto, 
@@ -227,7 +229,7 @@ const updateGasto = async (req, res) => {
   try {
     const { id } = req.params;
     const { descripcionGasto, montoGasto, fechaGasto, idTipo, idMetodoPago } = req.body;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el gasto existe y pertenece al usuario
     const existingGasto = await executeQuery(
@@ -300,7 +302,7 @@ const updateGasto = async (req, res) => {
 const deleteGasto = async (req, res) => {
   try {
     const { id } = req.params;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el gasto existe y pertenece al usuario
     const existingGasto = await executeQuery(
@@ -333,7 +335,7 @@ const deleteGasto = async (req, res) => {
 // Obtener resumen de gastos del usuario
 const getGastosResumen = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { fechaInicio, fechaFin } = req.query;
 
     let query = `

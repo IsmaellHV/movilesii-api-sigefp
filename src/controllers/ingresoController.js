@@ -3,8 +3,8 @@ const { executeStoredProcedure, executeQuery } = require('../config/database');
 // Insertar un nuevo ingreso usando stored procedure
 const createIngreso = async (req, res) => {
   try {
-    const { descripcionIngreso, montoIngreso, fechaIngreso, idTipo } = req.body;
-    const idUsuario = req.user.id;
+    const { descripcion, monto, fecha, idTipo } = req.body;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el tipo existe y es de categoría 'Ingreso'
     const tipo = await executeQuery(
@@ -27,17 +27,17 @@ const createIngreso = async (req, res) => {
 
     // Ejecutar stored procedure para insertar ingreso
     await executeStoredProcedure('InsertarIngreso', [
-      descripcionIngreso,
-      montoIngreso,
-      fechaIngreso,
       idUsuario,
+      montoIngreso,
+      descripcionIngreso,
+      fechaIngreso,
       idTipo
     ]);
 
     // Obtener el ingreso recién creado
     const nuevoIngreso = await executeQuery(
-      `SELECT i.idIngreso, i.descripcionIngreso, i.montoIngreso, 
-              DATE_FORMAT(i.fechaIngreso, '%Y-%m-%d') as fechaIngreso,
+      `SELECT i.idIngreso, i.descripcion, i.monto, 
+              DATE_FORMAT(i.fecha, '%Y-%m-%d') as fecha,
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
@@ -63,7 +63,7 @@ const createIngreso = async (req, res) => {
 // Listar ingresos del usuario usando stored procedure
 const getIngresosByUser = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { page = 1, limit = 10, fechaInicio, fechaFin, idTipo } = req.query;
 
     // Ejecutar stored procedure para listar ingresos
@@ -123,11 +123,11 @@ const getIngresosByUser = async (req, res) => {
 const getIngresoById = async (req, res) => {
   try {
     const { id } = req.params;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     const ingreso = await executeQuery(
-      `SELECT i.idIngreso, i.descripcionIngreso, i.montoIngreso, 
-              DATE_FORMAT(i.fechaIngreso, '%Y-%m-%d') as fechaIngreso,
+      `SELECT i.idIngreso, i.descripcion, i.monto, 
+              DATE_FORMAT(i.fecha, '%Y-%m-%d') as fecha,
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
@@ -158,8 +158,8 @@ const getIngresoById = async (req, res) => {
 const updateIngreso = async (req, res) => {
   try {
     const { id } = req.params;
-    const { descripcionIngreso, montoIngreso, fechaIngreso, idTipo } = req.body;
-    const idUsuario = req.user.id;
+    const { descripcion, monto, fecha, idTipo } = req.body;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el ingreso existe y pertenece al usuario
     const existingIngreso = await executeQuery(
@@ -194,13 +194,13 @@ const updateIngreso = async (req, res) => {
 
     // Actualizar el ingreso
     await executeQuery(
-      `UPDATE INGRESO SET descripcionIngreso = '${descripcionIngreso}', montoIngreso = ${montoIngreso}, fechaIngreso = '${fechaIngreso}', idTipo = ${idTipo} WHERE idIngreso = ${id} AND idUsuario = ${idUsuario}`
+      `UPDATE INGRESO SET descripcion = '${descripcion}', monto = ${monto}, fecha = '${fecha}', idTipo = ${idTipo} WHERE idIngreso = ${id} AND idUsuario = ${idUsuario}`
     );
 
     // Obtener el ingreso actualizado
     const ingresoActualizado = await executeQuery(
-      `SELECT i.idIngreso, i.descripcionIngreso, i.montoIngreso, 
-              DATE_FORMAT(i.fechaIngreso, '%Y-%m-%d') as fechaIngreso,
+      `SELECT i.idIngreso, i.descripcion, i.monto, 
+              DATE_FORMAT(i.fecha, '%Y-%m-%d') as fecha,
               i.idUsuario, i.idTipo, t.nombreTipo
        FROM INGRESO i 
        INNER JOIN TIPO t ON i.idTipo = t.idTipo 
@@ -225,7 +225,7 @@ const updateIngreso = async (req, res) => {
 const deleteIngreso = async (req, res) => {
   try {
     const { id } = req.params;
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
 
     // Verificar que el ingreso existe y pertenece al usuario
     const existingIngreso = await executeQuery(
@@ -240,7 +240,7 @@ const deleteIngreso = async (req, res) => {
     }
 
     // Ejecutar stored procedure para eliminar ingreso
-    await executeStoredProcedure('EliminarIngreso', [id]);
+    await executeStoredProcedure('EliminarIngreso', [id, idUsuario]);
 
     res.json({
       success: true,
@@ -258,26 +258,26 @@ const deleteIngreso = async (req, res) => {
 // Obtener resumen de ingresos del usuario
 const getIngresosResumen = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { fechaInicio, fechaFin } = req.query;
 
     let query = `
       SELECT 
         COUNT(*) as totalIngresos,
-        COALESCE(SUM(montoIngreso), 0) as montoTotal,
-        COALESCE(AVG(montoIngreso), 0) as montoPromedio,
-        COALESCE(MAX(montoIngreso), 0) as montoMaximo,
-        COALESCE(MIN(montoIngreso), 0) as montoMinimo
+        COALESCE(SUM(monto), 0) as montoTotal,
+        COALESCE(AVG(monto), 0) as montoPromedio,
+        COALESCE(MAX(monto), 0) as montoMaximo,
+        COALESCE(MIN(monto), 0) as montoMinimo
       FROM INGRESO 
       WHERE idUsuario = ${idUsuario}
     `;
 
     if (fechaInicio) {
-      query += ` AND fechaIngreso >= '${fechaInicio}'`;
+      query += ` AND fecha >= '${fechaInicio}'`;
     }
 
     if (fechaFin) {
-      query += ` AND fechaIngreso <= '${fechaFin}'`;
+      query += ` AND fecha <= '${fechaFin}'`;
     }
 
     const resumen = await executeQuery(query);

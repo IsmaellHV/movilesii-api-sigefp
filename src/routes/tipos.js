@@ -7,30 +7,30 @@ const { validateType, validateId } = require('../middleware/ajvValidation');
 /**
  * @route GET /api/${PREFIJO}/tipos
  * @desc Obtener todos los tipos
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   tipoController.getAllTipos
 );
 
 /**
  * @route GET /api/${PREFIJO}/tipos/categoria/:categoria
  * @desc Obtener tipos por categoría (Ingreso, Gasto, MetodoPago)
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/categoria/:categoria', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   tipoController.getTiposByCategoria
 );
 
 /**
  * @route GET /api/${PREFIJO}/tipos/:id
  * @desc Obtener un tipo por ID
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   tipoController.getTipoById
 );
@@ -38,10 +38,10 @@ router.get('/:id',
 /**
  * @route POST /api/${PREFIJO}/tipos
  * @desc Crear un nuevo tipo
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.post('/', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateType,
   tipoController.createTipo
 );
@@ -49,10 +49,10 @@ router.post('/',
 /**
  * @route PUT /api/${PREFIJO}/tipos/:id
  * @desc Actualizar un tipo
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.put('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   validateType,
   tipoController.updateTipo
@@ -61,10 +61,10 @@ router.put('/:id',
 /**
  * @route DELETE /api/${PREFIJO}/tipos/:id
  * @desc Eliminar un tipo
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.delete('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   tipoController.deleteTipo
 );

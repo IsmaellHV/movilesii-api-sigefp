@@ -117,16 +117,16 @@ const typeSchema = {
 const ingresoSchema = {
   type: 'object',
   properties: {
-    montoIngreso: {
+    monto: {
       type: 'number',
       minimum: 0.01
     },
-    descripcionIngreso: {
+    descripcion: {
       type: 'string',
       minLength: 3,
       maxLength: 200
     },
-    fechaIngreso: {
+    fecha: {
       type: 'string',
       format: 'date'
     },
@@ -135,7 +135,7 @@ const ingresoSchema = {
       minimum: 1
     }
   },
-  required: ['montoIngreso', 'descripcionIngreso', 'idTipo'],
+  required: ['monto', 'descripcion', 'idTipo'],
   additionalProperties: false
 };
 
@@ -145,16 +145,16 @@ const ingresoSchema = {
 const gastoSchema = {
   type: 'object',
   properties: {
-    montoGasto: {
+    monto: {
       type: 'number',
       minimum: 0.01
     },
-    descripcionGasto: {
+    descripcion: {
       type: 'string',
       minLength: 3,
       maxLength: 200
     },
-    fechaGasto: {
+    fecha: {
       type: 'string',
       format: 'date'
     },
@@ -167,7 +167,7 @@ const gastoSchema = {
       minimum: 1
     }
   },
-  required: ['montoGasto', 'descripcionGasto', 'idTipo', 'idMetodoPago'],
+  required: ['monto', 'descripcion', 'idTipo', 'idMetodoPago'],
   additionalProperties: false
 };
 
@@ -205,6 +205,10 @@ const idParamSchema = {
   type: 'object',
   properties: {
     id: {
+      type: 'string',
+      pattern: '^[1-9]\\d*$'
+    },
+    userId: {
       type: 'string',
       pattern: '^[1-9]\\d*$'
     }

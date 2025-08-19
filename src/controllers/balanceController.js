@@ -3,7 +3,7 @@ const { executeStoredProcedure, executeQuery } = require('../config/database');
 // Calcular balance del usuario usando stored procedure
 const getBalanceByUser = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { fechaInicio, fechaFin } = req.query;
 
     // Ejecutar stored procedure para calcular balance
@@ -58,7 +58,7 @@ const getBalanceByUser = async (req, res) => {
 // Obtener resumen financiero detallado
 const getResumenFinanciero = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { fechaInicio, fechaFin } = req.query;
 
     // Construir consultas base
@@ -171,7 +171,7 @@ const getResumenFinanciero = async (req, res) => {
 // Obtener estadísticas mensuales
 const getEstadisticasMensuales = async (req, res) => {
   try {
-    const idUsuario = req.user.id;
+    const idUsuario = req.params.userId; // TEMPORAL: Usando parámetro de URL para pruebas
     const { año = new Date().getFullYear() } = req.query;
 
     // Obtener estadísticas mensuales de ingresos

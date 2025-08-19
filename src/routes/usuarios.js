@@ -7,20 +7,20 @@ const { validateUpdateUser, validateId } = require('../middleware/ajvValidation'
 /**
  * @route GET /api/${PREFIJO}/usuarios
  * @desc Obtener todos los usuarios (solo para administradores)
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   usuarioController.getAllUsuarios
 );
 
 /**
  * @route GET /api/${PREFIJO}/usuarios/:id
  * @desc Obtener un usuario por ID
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   usuarioController.getUsuarioById
 );
@@ -28,10 +28,10 @@ router.get('/:id',
 /**
  * @route PUT /api/${PREFIJO}/usuarios/:id
  * @desc Actualizar información del usuario
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.put('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   validateUpdateUser,
   usuarioController.updateUsuario
@@ -40,10 +40,10 @@ router.put('/:id',
 /**
  * @route DELETE /api/${PREFIJO}/usuarios/:id
  * @desc Eliminar cuenta de usuario
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.delete('/:id', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   usuarioController.deleteUsuario
 );
@@ -51,10 +51,10 @@ router.delete('/:id',
 /**
  * @route GET /api/${PREFIJO}/usuarios/:id/estadisticas
  * @desc Obtener estadísticas del usuario
- * @access Private
+ * @access Public (TEMPORAL: Autenticación deshabilitada para pruebas)
  */
 router.get('/:id/estadisticas', 
-  authenticateToken,
+  // authenticateToken, // TEMPORAL: Autenticación deshabilitada para pruebas
   validateId,
   usuarioController.getUsuarioEstadisticas
 );

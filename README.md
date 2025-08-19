@@ -167,6 +167,51 @@ La variable `PREFIJO` define la versión de la API y se utiliza en todas las rut
 - **Ejemplo**: Con `PREFIJO=v1`, la ruta sería `/api/v1/usuarios`
 - **Valores sugeridos**: v1, v2, v3, etc.
 
+## 🧪 Configuración para Pruebas
+
+**⚠️ IMPORTANTE: Cambios Temporales Activos**
+
+Para facilitar las pruebas, se han deshabilitado temporalmente las validaciones de autenticación:
+
+### Cambios Realizados:
+
+1. **Middleware de Autenticación Comentado**:
+   - `authenticateToken` deshabilitado en todas las rutas
+   - Acceso público temporal a todos los endpoints
+
+2. **Rutas Modificadas para Usar ID de Usuario**:
+   - **Balance**: `/api/v1/balance/:userId` (en lugar de obtener del token)
+   - **Gastos**: `/api/v1/gastos/:userId` (rutas que requieren usuario)
+   - **Ingresos**: `/api/v1/ingresos/:userId` (rutas que requieren usuario)
+   - **Usuarios**: Mantienen estructura original `/:id`
+   - **Tipos**: Sin cambios (no dependen del usuario)
+
+3. **Controladores Actualizados**:
+   - Uso de `req.params.userId` en lugar de `req.user.id`
+   - Comentarios `// TEMPORAL` agregados para identificar cambios
+
+### Ejemplos de Uso en Pruebas:
+
+```bash
+# Obtener balance del usuario ID 1
+GET /api/v1/balance/1
+
+# Listar gastos del usuario ID 1
+GET /api/v1/gastos/1
+
+# Obtener resumen de ingresos del usuario ID 1
+GET /api/v1/ingresos/1/resumen/estadisticas
+```
+
+### ⚠️ Revertir Cambios:
+
+Para restaurar la autenticación:
+1. Descomentar todas las líneas `// authenticateToken,` en los archivos de rutas
+2. Cambiar `req.params.userId` por `req.user.id` en los controladores
+3. Restaurar rutas originales sin `/:userId`
+
+---
+
 ## 📚 Documentación de la API
 
 ### Base URL
@@ -179,7 +224,9 @@ http://localhost:3000/api/${PREFIJO}
 
 ### Autenticación
 
-La API utiliza JWT para autenticación. Incluir el token en el header:
+**🚨 TEMPORAL**: La autenticación está deshabilitada para pruebas. Ver sección "Configuración para Pruebas".
+
+En producción, la API utiliza JWT para autenticación. Incluir el token en el header:
 
 ```
 Authorization: Bearer <token>
